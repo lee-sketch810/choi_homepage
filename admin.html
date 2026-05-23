@@ -371,6 +371,31 @@
           </p>
           <div id="paraList" class="para-list"></div>
           <button class="btn-add-item" onclick="addPara()">+ 문단 추가</button>
+
+          <!-- 작가 소개 사진 -->
+          <div style="border-top:1px solid var(--rule);margin:2rem 0 1.5rem"></div>
+          <div class="sec-head" style="margin-bottom:1rem">
+            <div class="sec-label">작가 소개 사진</div>
+            <div class="sec-title">오른쪽에 표시되는 작품/작가 사진</div>
+          </div>
+          <div style="display:grid;grid-template-columns:150px 1fr;gap:1.5rem;align-items:start;margin-bottom:1.5rem">
+            <div>
+              <img id="aboutPhotoPreview" src="" style="width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--warm);border:1px solid var(--rule);display:block;" alt="about photo">
+              <p style="font-family:var(--garamond);font-size:.72rem;color:var(--light);text-align:center;margin-top:.4rem">현재 사진</p>
+            </div>
+            <div>
+              <label class="fl">사진 URL</label>
+              <input id="aboutPhotoUrl" class="inp" type="text" placeholder="이미지 URL 입력" style="margin-bottom:1rem"
+                oninput="(function(v){var p=document.getElementById('aboutPhotoPreview');if(v)p.src=v;})(this.value)">
+              <label class="fl">캡션 텍스트</label>
+              <input id="aboutPhotoCaption" class="inp" type="text" placeholder="예: Choi Kyung Sun · 최경선">
+              <p style="font-family:var(--garamond);font-size:.76rem;color:var(--light);margin-top:.6rem;line-height:1.7">
+                Instagram 또는 GitHub에 업로드된 이미지 URL을 붙여넣으세요.<br>
+                URL 입력 시 왼쪽 미리보기가 바뀝니다.
+              </p>
+            </div>
+          </div>
+
           <div class="save-bar">
             <button class="btn-save" onclick="saveSection('about')">저장 &amp; 배포</button>
             <span class="save-hint" id="aboutHint"></span>
@@ -740,6 +765,19 @@ function populateForms(){
   const paras=[...htmlText.matchAll(/<p class="about-statement">([\s\S]*?)<\/p>/g)].map(m=>m[1].trim());
   const pl=document.getElementById("paraList"); pl.innerHTML="";
   paras.forEach(p=>pl.appendChild(mkParaCard(p)));
+  // About photo
+  const aboutDoc2=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const aboutImg=aboutDoc2.querySelector('.about-profile img');
+  const aboutPhotoUrlEl=document.getElementById('aboutPhotoUrl');
+  const aboutPhotoPreviewEl=document.getElementById('aboutPhotoPreview');
+  if(aboutImg && aboutPhotoUrlEl){
+    const src=aboutImg.getAttribute('src')||'';
+    aboutPhotoUrlEl.value=src;
+    if(aboutPhotoPreviewEl) aboutPhotoPreviewEl.src=src;
+  }
+  const aboutCapEl=aboutDoc2.querySelector('.about-right p[style]');
+  const aboutPhotoCaptionEl=document.getElementById('aboutPhotoCaption');
+  if(aboutCapEl && aboutPhotoCaptionEl) aboutPhotoCaptionEl.value=aboutCapEl.textContent.trim();
 
   // Statement
   const sq=htmlText.match(/<blockquote>([\s\S]*?)<\/blockquote>/);
@@ -990,6 +1028,22 @@ async function saveSection(sec){
       const nb=paras.map(p=>`    <p class="about-statement">\n      ${p}\n    </p>`).join("\n\n");
       updated=updated.replace(existing[0][0],nb);
       for(let i=1;i<existing.length;i++) updated=updated.replace(existing[i][0],"");
+    }
+    // About photo URL
+    const newPhotoUrl=(document.getElementById('aboutPhotoUrl')||{}).value||'';
+    if(newPhotoUrl.trim()){
+      updated=updated.replace(
+        /(<div class="about-profile">\s*<img\s+src=")[^"]*(")/,
+        (_,pre,post)=>pre+newPhotoUrl.trim()+post
+      );
+    }
+    // About photo caption
+    const newCaption=(document.getElementById('aboutPhotoCaption')||{}).value||'';
+    if(newCaption.trim()){
+      updated=updated.replace(
+        /(<div class="about-right[^"]*"[^>]*>[\s\S]*?<\/div>\s*\n\s*<p [^>]*>\s*)([\s\S]*?)(\s*<\/p>\s*\n\s*<\/div>\s*\n<\/section>)/,
+        (_,pre,__,post)=>pre+newCaption.trim()+post
+      );
     }
   }
   if(sec==="stmt"){
