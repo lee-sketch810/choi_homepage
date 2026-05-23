@@ -1151,7 +1151,7 @@ async function saveSection(sec){
     try{
       await commitToGH(updated,LABELS[sec]||sec);
       htmlText=updated;
-      setHint(sec,"✦ 저장 완료 — Netlify 자동 배포 중 (약 1분)");
+      setHint(sec,"✦ 저장 완료 — GitHub Pages 자동 배포 중 (약 1분)");
       toast("✦ 저장 완료! 1분 후 홈페이지에 반영됩니다.");
     }catch(e){
       setHint(sec,"저장 실패: "+e.message);
@@ -1466,7 +1466,7 @@ async function saveImgChanges(){
   if(mode==='github'){
     try{
       await commitToGH(htmlText,'포트폴리오 이미지 교체');
-      setHint('img','✦ 저장 완료 — Netlify 자동 배포 중 (약 1분)');
+      setHint('img','✦ 저장 완료 — GitHub Pages 자동 배포 중 (약 1분)');
       toast('✦ 이미지 저장 완료! 1분 후 홈페이지에 반영됩니다.');
     }catch(e){ setHint('img','저장 실패: '+e.message); toast('저장 실패: '+e.message); }
   } else if(mode==='local'){
@@ -1589,7 +1589,7 @@ async function saveContact(){
     try{
       await commitToGH(updated,'문의 섹션 업데이트');
       htmlText=updated;
-      setHint('contact','✦ 저장 완료 — Netlify 자동 배포 중 (약 1분)');
+      setHint('contact','✦ 저장 완료 — GitHub Pages 자동 배포 중 (약 1분)');
       toast('✦ 저장 완료! 1분 후 홈페이지에 반영됩니다.');
     }catch(e){ setHint('contact','저장 실패: '+e.message); toast('저장 실패: '+e.message); }
   } else if(mode==='local'){
