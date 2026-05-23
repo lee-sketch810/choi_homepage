@@ -188,6 +188,10 @@
     .img-drop input[type=file]{display:none}
     .img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem}
     .img-card{position:relative;background:var(--warm);border:1px solid var(--rule);overflow:hidden;border-radius:2px}
+    .img-card[draggable="true"]{cursor:grab}
+    .img-card[draggable="true"]:active{cursor:grabbing}
+    .img-card.drag-over{outline:2px solid var(--gold);outline-offset:2px;opacity:.7}
+    .img-card.dragging{opacity:.35;border-style:dashed}
     .img-card img{width:100%;height:110px;object-fit:cover;display:block}
     .img-card-bar{padding:.4rem .6rem;background:#fff;border-top:1px solid var(--rule)}
     .img-card-name{font-size:.72rem;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem}
@@ -787,7 +791,12 @@ function mkImgCard(wiClass,src,alt){
   const d=document.createElement('div');
   d.className='img-card';
   d.dataset.wi=wiClass;
+  d.draggable=true;
   d.style.cssText='position:relative;background:var(--warm);border:1px solid var(--rule);border-radius:2px;overflow:hidden';
+  d.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',wiClass); d.classList.add('dragging'); });
+  d.addEventListener('dragend',()=>{ d.classList.remove('dragging'); document.querySelectorAll('.img-card').forEach(c=>c.classList.remove('drag-over')); });
+  d.addEventListener('dragover',e=>{ e.preventDefault(); document.querySelectorAll('.img-card').forEach(c=>c.classList.remove('drag-over')); d.classList.add('drag-over'); });
+  d.addEventListener('drop',e=>{ e.preventDefault(); d.classList.remove('drag-over'); const fromWi=e.dataTransfer.getData('text/plain'); if(fromWi&&fromWi!==wiClass) reorderCards(fromWi,wiClass); });
   const imgHtml=src
     ? `<img class="img-preview" src="${esc(src)}" alt="${esc(alt)}" style="height:140px;object-fit:cover;width:100%;display:block;background:#EDE5D8" onerror="this.outerHTML='<div class=\\'img-expired\\' style=\\'height:140px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.72rem;color:#9E9080;text-align:center;padding:.5rem\\'>이미지<br>만료됨</div>'"/>`
     : `<div style="height:140px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.72rem;color:#9E9080">이미지 없음</div>`;
@@ -1195,6 +1204,35 @@ function addWorkItem(){
     const newCard=document.querySelector('[data-wi="'+wiClass+'"]');
     if(newCard) newCard.scrollIntoView({behavior:'smooth',block:'center'});
   },100);
+}
+
+function reorderCards(fromWi,toWi){
+  const grid=document.getElementById('imgGrid');
+  const fromCard=grid.querySelector('[data-wi="'+fromWi+'"]');
+  const toCard=grid.querySelector('[data-wi="'+toWi+'"]');
+  if(!fromCard||!toCard) return;
+  // DOM 순서 교환
+  const allCards=[...grid.children];
+  const fi=allCards.indexOf(fromCard);
+  const ti=allCards.indexOf(toCard);
+  if(fi<ti) toCard.after(fromCard);
+  else toCard.before(fromCard);
+  // htmlText의 work-item 순서도 동일하게 변경
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const wg=doc.querySelector('.work-grid');
+  if(wg){
+    const fromEl=doc.querySelector('.work-item.'+fromWi);
+    const toEl=doc.querySelector('.work-item.'+toWi);
+    if(fromEl&&toEl){
+      const items=[...wg.querySelectorAll('.work-item')];
+      const fIdx=items.indexOf(fromEl);
+      const tIdx=items.indexOf(toEl);
+      if(fIdx<tIdx) toEl.after(fromEl);
+      else toEl.before(fromEl);
+      htmlText=doc.documentElement.outerHTML;
+    }
+  }
+  setHint('img','✦ 순서 변경됨 — [저장 & 배포]를 눌러 적용하세요');
 }
 
 function handleImgChange(input,wiClass){
