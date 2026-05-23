@@ -424,8 +424,11 @@
           <div class="sec-title">포트폴리오 이미지 교체 &amp; 관리</div>
         </div>
         <div class="sec-body">
-          <p style="font-family:var(--garamond);font-size:.82rem;color:var(--light);margin-bottom:1.2rem">
-            각 작품의 <strong style="color:var(--gold)">✎ 변경</strong> 버튼을 눌러 새 이미지 파일을 선택하세요. 모두 교체한 뒤 <strong style="color:var(--gold)">저장 &amp; 배포</strong>를 누르면 홈페이지에 반영됩니다.
+          <p style="font-family:var(--garamond);font-size:.82rem;color:var(--light);margin-bottom:1.2rem;line-height:1.9">
+            <strong style="color:var(--gold)">✎ 변경</strong> — 기존 이미지 교체 &nbsp;|&nbsp;
+            <strong style="color:#c08080">✕</strong> — 작품 삭제 &nbsp;|&nbsp;
+            <strong style="color:var(--mid)">＋ 작품 추가</strong> — 새 작품 슬롯 추가<br>
+            모두 수정한 뒤 <strong style="color:var(--gold)">저장 &amp; 배포</strong>를 눌러야 홈페이지에 반영됩니다.
           </p>
           <div id="imgGrid" class="img-grid"></div>
           <div class="save-bar">
@@ -678,41 +681,22 @@ function populateImages(){
   const workItems=[...doc.querySelectorAll('.work-item')];
   if(!workItems.length){
     grid.innerHTML='<p style="font-family:var(--garamond);font-size:.82rem;color:var(--light)">현재 등록된 이미지가 없습니다.</p>';
-    return;
+  } else {
+    workItems.forEach((item,i)=>{
+      const img=item.querySelector('img');
+      if(!img) return;
+      const src=img.getAttribute('src')||'';
+      const alt=img.getAttribute('alt')||('작품 '+(i+1));
+      const wiClass=[...item.classList].find(c=>c.startsWith('wi-'))||('wi-'+(i+1));
+      grid.appendChild(mkImgCard(wiClass,src,alt));
+    });
   }
-  workItems.forEach((item,i)=>{
-    const img=item.querySelector('img');
-    if(!img) return;
-    const src=img.getAttribute('src')||'';
-    const alt=img.getAttribute('alt')||('작품 '+(i+1));
-    const wiClass=[...item.classList].find(c=>c.startsWith('wi-'))||('wi-'+(i+1));
-    const d=document.createElement('div');
-    d.className='img-card';
-    d.dataset.wi=wiClass;
-    d.innerHTML=`
-      <div style="position:relative">
-        <img class="img-preview" src="${esc(src)}" alt="${esc(alt)}"
-          style="height:120px;object-fit:cover;width:100%;display:block;background:#EDE5D8"
-          onerror="this.outerHTML='<div class=\\'img-expired\\' style=\\'height:120px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.72rem;color:#9E9080\\'>이미지 만료됨</div>'"/>
-        <div style="position:absolute;top:.3rem;left:.3rem;background:rgba(28,25,20,.75);color:rgba(255,255,255,.85);font-family:var(--garamond);font-size:.62rem;padding:.15rem .4rem;letter-spacing:.08em">${wiClass}</div>
-      </div>
-        <button onclick="deleteWorkItem(this,'${wiClass}')" title="삭제"
-          style="position:absolute;top:.3rem;right:.3rem;background:rgba(176,64,64,.85);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:.8rem;font-weight:bold;line-height:1">✕</button>
-      </div>
-      <div style="padding:.5rem .6rem;background:#fff;border-top:1px solid var(--rule)">
-        <input type="text" value="${esc(alt)}" placeholder="작품 제목"
-          onchange="updateImgTitle(this,'${wiClass}')"
-          style="width:100%;border:none;border-bottom:1px dashed var(--rule);outline:none;background:transparent;font-family:var(--serif-ko);font-size:.78rem;color:var(--dark);padding:.2rem 0;margin-bottom:.4rem"/>
-        <button onclick="triggerImgChange(this,'${wiClass}')"
-          style="width:100%;font-family:var(--garamond);font-size:.7rem;color:var(--gold);background:none;border:1px solid rgba(140,107,63,.3);cursor:pointer;padding:.25rem 0;letter-spacing:.1em">✎ 이미지 변경</button>
-      </div>
-      <input type="file" accept="image/*" style="display:none" onchange="handleImgChange(this,'${wiClass}')"/>`;
-    grid.appendChild(d);
-  });
   // 작품 추가 버튼
   const addBtn=document.createElement('div');
-  addBtn.style.cssText='border:2px dashed var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;background:var(--warm);gap:.5rem;border-radius:2px';
-  addBtn.innerHTML='<span style="font-size:2rem;opacity:.35">＋</span><span style="font-family:var(--garamond);font-size:.78rem;color:var(--light);letter-spacing:.1em">작품 추가</span>';
+  addBtn.style.cssText='border:2px dashed var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:190px;cursor:pointer;background:var(--warm);gap:.5rem;border-radius:2px;transition:all .2s';
+  addBtn.innerHTML='<span style="font-size:2.5rem;opacity:.4;line-height:1">＋</span><span style="font-family:var(--garamond);font-size:.78rem;color:var(--light);letter-spacing:.12em">작품 추가</span>';
+  addBtn.onmouseenter=()=>{addBtn.style.background='var(--cream)';addBtn.style.borderColor='var(--gold)'};
+  addBtn.onmouseleave=()=>{addBtn.style.background='var(--warm)';addBtn.style.borderColor='rgba(140,107,63,.2)'};
   addBtn.onclick=addWorkItem;
   grid.appendChild(addBtn);
   // Hero image preview
@@ -721,6 +705,34 @@ function populateImages(){
     const prev=document.getElementById('heroImgPreview');
     if(prev) prev.src=heroImgEl.getAttribute('src')||'';
   }
+}
+
+function mkImgCard(wiClass,src,alt){
+  const d=document.createElement('div');
+  d.className='img-card';
+  d.dataset.wi=wiClass;
+  d.style.cssText='position:relative;background:var(--warm);border:1px solid var(--rule);border-radius:2px;overflow:hidden';
+  const imgHtml=src
+    ? `<img class="img-preview" src="${esc(src)}" alt="${esc(alt)}" style="height:140px;object-fit:cover;width:100%;display:block;background:#EDE5D8" onerror="this.outerHTML='<div class=\\'img-expired\\' style=\\'height:140px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.72rem;color:#9E9080;text-align:center;padding:.5rem\\'>이미지<br>만료됨</div>'"/>`
+    : `<div style="height:140px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.72rem;color:#9E9080">이미지 없음</div>`;
+  d.innerHTML=`
+    <div style="position:relative">
+      ${imgHtml}
+      <div style="position:absolute;top:.3rem;left:.3rem;background:rgba(28,25,20,.75);color:rgba(255,255,255,.85);font-family:var(--garamond);font-size:.62rem;padding:.15rem .4rem;letter-spacing:.08em;pointer-events:none">${wiClass}</div>
+      <button onclick="deleteWorkItem(this,'${wiClass}')" title="삭제"
+        style="position:absolute;top:.3rem;right:.3rem;background:rgba(176,64,64,.9);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:.85rem;font-weight:bold;line-height:24px;text-align:center;padding:0;transition:background .15s"
+        onmouseenter="this.style.background='#b04040'" onmouseleave="this.style.background='rgba(176,64,64,.9)'">✕</button>
+    </div>
+    <div style="padding:.6rem .7rem;background:#fff;border-top:1px solid var(--rule)">
+      <input type="text" value="${esc(alt)}" placeholder="작품 제목"
+        onchange="updateImgTitle(this,'${wiClass}')"
+        style="width:100%;border:none;border-bottom:1px dashed var(--rule);outline:none;background:transparent;font-family:var(--serif-ko);font-size:.78rem;color:var(--dark);padding:.2rem 0;margin-bottom:.5rem"/>
+      <button onclick="triggerImgChange(this,'${wiClass}')"
+        style="width:100%;font-family:var(--garamond);font-size:.72rem;color:var(--gold);background:none;border:1px solid rgba(140,107,63,.35);cursor:pointer;padding:.3rem 0;letter-spacing:.1em;transition:all .15s"
+        onmouseenter="this.style.background='var(--cream)'" onmouseleave="this.style.background='none'">✎ 이미지 변경</button>
+    </div>
+    <input type="file" accept="image/*" style="display:none" onchange="handleImgChange(this,'${wiClass}')"/>`;
+  return d;
 }
 
 /* ══════════════════════════════════════════
@@ -1061,28 +1073,52 @@ function updateImgTitle(input,wiClass){
 }
 
 function deleteWorkItem(btn,wiClass){
-  if(!confirm(wiClass+' 작품을 삭제하시겠어요?')) return;
-  const re=new RegExp('<div[^>]+class="[^"]*\\b'+wiClass+'\\b[^"]*"[^>]*>[\\s\\S]{0,600}?</div>\\s*</div>\\s*\\n?','i');
-  htmlText=htmlText.replace(re,'');
+  if(!confirm(wiClass+' 작품을 삭제하시겠어요?\n\n저장 & 배포를 눌러야 홈페이지에 반영됩니다.')) return;
+  // DOMParser로 안전하게 삭제
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const el=doc.querySelector('.work-item.'+wiClass);
+  if(el){ el.remove(); htmlText=doc.documentElement.outerHTML; }
   btn.closest('.img-card').remove();
   setHint('img','✦ 삭제됨 — [저장 & 배포]를 눌러 적용하세요');
+  toast('✦ '+wiClass+' 작품이 삭제됐습니다. 저장 & 배포를 눌러주세요.');
 }
 
 function addWorkItem(){
+  if(!htmlText){ toast('먼저 [파일 불러오기]를 눌러주세요.'); return; }
   // 현재 최대 wi- 번호 파악
   const nums=[...htmlText.matchAll(/class="work-item wi-(\d+)"/g)].map(m=>+m[1]);
-  const next=(nums.length?Math.max(...nums):9)+1;
+  const next=(nums.length?Math.max(...nums):0)+1;
   const wiClass='wi-'+next;
-  // index.html 포트폴리오 섹션에 새 항목 추가
-  const newItem=`\n    <div class="work-item ${wiClass}">\n      <img src="" alt="새 작품" loading="lazy"/>\n    </div>`;
-  htmlText=htmlText.replace(/(<\/div>\s*\n<\/section>)/,newItem+'$1');
+  // DOMParser로 안전하게 추가
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const workGrid=doc.querySelector('.work-grid');
+  if(workGrid){
+    const newEl=doc.createElement('div');
+    newEl.className='work-item '+wiClass;
+    const newImg=doc.createElement('img');
+    newImg.setAttribute('src','');
+    newImg.setAttribute('alt','새 작품');
+    newImg.setAttribute('loading','lazy');
+    newEl.appendChild(newImg);
+    workGrid.appendChild(newEl);
+    htmlText=doc.documentElement.outerHTML;
+  } else {
+    // 폴백: 정규식
+    const newItem=`\n    <div class="work-item ${wiClass}">\n      <img src="" alt="새 작품" loading="lazy"/>\n    </div>`;
+    htmlText=htmlText.replace(/(<\/div>\s*\n?\s*<\/section>)/,newItem+'$1');
+  }
   // 그리드 CSS 추가 (기본 1:1 비율)
   if(!htmlText.includes('.'+wiClass+'{')){
     htmlText=htmlText.replace('</style>',`.${wiClass}{aspect-ratio:1/1}\n</style>`);
   }
   populateImages();
-  setHint('img','✦ 작품 추가됨 — 이미지와 제목을 입력 후 [저장 & 배포]');
-  toast('✦ 새 작품 슬롯이 추가됐습니다. 이미지를 선택해 주세요.');
+  setHint('img','✦ 작품 추가됨 — 이미지를 선택하고 제목 입력 후 [저장 & 배포]');
+  toast('✦ 새 작품 슬롯('+wiClass+')이 추가됐습니다. 이미지를 선택해 주세요.');
+  // 스크롤을 새로 추가된 카드로 이동
+  setTimeout(()=>{
+    const newCard=document.querySelector('[data-wi="'+wiClass+'"]');
+    if(newCard) newCard.scrollIntoView({behavior:'smooth',block:'center'});
+  },100);
 }
 
 function handleImgChange(input,wiClass){
