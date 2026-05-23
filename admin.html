@@ -1128,21 +1128,23 @@ async function saveSection(sec){
   }
   if(sec==="exh"){
     const list=collectExh();
-    const newHtml=list.map(g=>{
-      const rows=g.items.map(i=>{
-        const ds=i.date?`\n          <br><span style="font-size:.82rem;color:var(--light);">${i.date}</span>`:"";
-        return`      <div class="exh-item">
+    // DOMParser로 안전하게 처리 (regex 대신 — 중복 </section> 버그 방지)
+    const exhDoc=(new DOMParser()).parseFromString(updated,'text/html');
+    const exhRight=exhDoc.querySelector('.exh-right');
+    if(exhRight){
+      exhRight.innerHTML="\n\n"+list.map(g=>{
+        const rows=g.items.map(i=>{
+          const ds=i.date?`\n          <br><span style="font-size:.82rem;color:var(--light);">${i.date}</span>`:"";
+          return`      <div class="exh-item">
         <div class="exh-name"><strong>${i.name}</strong>${ds}</div>
         <div class="exh-venue">${i.venue}</div>
       </div>`;
-      }).join("\n");
-      return`    <div class="exh-year-group">
+        }).join("\n");
+        return`    <div class="exh-year-group">
       <div class="exh-year">${g.year}</div>\n${rows}\n    </div>`;
-    }).join("\n\n");
-    updated=updated.replace(
-      /(<div class="exh-right[^"]*"[^>]*>)([\s\S]*?)(\s*<\/div>\s*<\/section>)/,
-      (_,o,__,c)=>o+"\n\n"+newHtml+"\n\n  "+c.trim()+"\n</section>"
-    );
+      }).join("\n\n")+"\n\n  ";
+    }
+    updated=exhDoc.documentElement.outerHTML;
   }
 
   const mode=getMode();
@@ -1237,5 +1239,4 @@ function addImgCard(name,path,src){
   d.innerHTML=`
     <img src="${src}" alt="${name}"/>
     <div class="img-card-bar">
-      <div class="img-card-name">${name}</div>
-      <div class="img-card-path" onclick="copyPath('images/${name}')" title="클릭하여 경로
+    
