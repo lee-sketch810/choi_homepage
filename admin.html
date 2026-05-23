@@ -16,10 +16,10 @@
     body{background:#f0ece4;color:var(--dark);font-family:var(--serif-ko);font-weight:300;min-height:100vh}
 
     /* ── SCREENS ── */
-    .screen{display:none !important}
-    #screen-login.on{display:flex !important;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)}
-    #screen-setup.on{display:flex !important;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)}
-    #screen-admin.on{display:block !important}
+    .screen{display:none}
+    #screen-login.on{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)}
+    #screen-setup.on{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)}
+    #screen-admin.on{display:block}
 
     /* ── LOGIN ── */
     .auth-box{background:var(--cream);padding:3.5rem 3rem;width:380px;text-align:center}
@@ -576,10 +576,8 @@ function showScreen(id){
     el.style.display="none";
   });
   const target=document.getElementById(id);
+  target.style.display=""; // 인라인 스타일 초기화
   target.classList.add("on");
-  // 각 화면에 맞는 display 설정
-  if(id==="screen-admin") target.style.display="block";
-  else target.style.display="flex";
 }
 
 /* ══════════════════════════════════════════
@@ -1139,10 +1137,13 @@ async function saveSection(sec){
       return`    <div class="exh-year-group">
       <div class="exh-year">${g.year}</div>\n${rows}\n    </div>`;
     }).join("\n\n");
-    updated=updated.replace(
-      /(<div class="exh-right[^"]*"[^>]*>)([\s\S]*?)(\s*<\/div>\s*<\/section>)/,
-      (_,o,__,c)=>o+"\n\n"+newHtml+"\n\n  "+c.trim()+"\n</section>"
-    );
+    // DOMParser로 안전하게 처리 (regex 대신 - 중복 section 태그 버그 방지)
+    const exhDoc=(new DOMParser()).parseFromString(updated,'text/html');
+    const exhRight=exhDoc.querySelector('.exh-right');
+    if(exhRight){
+      exhRight.innerHTML="\n\n"+newHtml+"\n\n  ";
+    }
+    updated=exhDoc.documentElement.outerHTML;
   }
 
   const mode=getMode();
@@ -1238,4 +1239,382 @@ function addImgCard(name,path,src){
     <img src="${src}" alt="${name}"/>
     <div class="img-card-bar">
       <div class="img-card-name">${name}</div>
-      <div class="img-card-path" onclick="copyPath('images/${name}')" title="클릭하여 경로
+      <div class="img-card-path" onclick="copyPath('images/${name}')" title="클릭하여 경로 복사">
+        📋 경로 복사
+      </div>
+    </div>
+    <button class="img-card-del" onclick="this.closest('.img-card').remove()" title="삭제">✕</button>`;
+  grid.prepend(d);
+}
+
+/* ══════════════════════════════════════════
+   HERO IMAGE CHANGE
+══════════════════════════════════════════ */
+/* 이미지 압축 (최대 1200px, JPEG 85%) — GitHub API 1MB 제한 대응 */
+async function compressImage(dataUrl, maxW=1200, quality=0.85){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width, h=img.height;
+      if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+      const cv=document.createElement('canvas');
+      cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(cv.toDataURL('image/jpeg',quality));
+    };
+    img.src=dataUrl;
+  });
+}
+
+function handleHeroImg(input){
+  const file=input.files[0]; if(!file) return;
+  if(!htmlText){ toast('먼저 [최신 내용 불러오기]를 눌러주세요.'); return; }
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const compressed=await compressImage(e.target.result);
+    const b64=compressed.split(',')[1];
+    const fn=file.name;
+    document.getElementById('heroImgPreview').src=compressed;
+    const newSrc=await uploadImg(fn,b64,'메인 사진 교체');
+    if(newSrc){
+      htmlText=htmlText.replace(
+        /(<div class="hero-image">[\s\S]{0,200}?<img[^>]+src=")[^"]*(")/,
+        '$1'+newSrc+'$2'
+      );
+      setHint('hero','✦ 사진 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ══════════════════════════════════════════
+   ABOUT PHOTO UPLOAD
+══════════════════════════════════════════ */
+function handleAboutImg(input){
+  const file=input.files[0]; if(!file) return;
+  if(!htmlText){ toast('먼저 [최신 내용 불러오기]를 눌러주세요.'); return; }
+  const statusEl=document.getElementById('aboutImgStatus');
+  const previewEl=document.getElementById('aboutPhotoPreview');
+  statusEl.textContent='업로드 중...';
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const compressed=await compressImage(e.target.result);
+    const b64=compressed.split(',')[1];
+    const fn=file.name;
+    previewEl.src=compressed;
+    const newSrc=await uploadImg(fn,b64,'작가 소개 사진 교체');
+    if(newSrc){
+      window._aboutNewUrl=newSrc;
+      statusEl.textContent='✦ 업로드 완료 — [저장 & 배포]를 눌러 적용하세요';
+      setHint('about','✦ 사진 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+    } else {
+      statusEl.textContent='⚠ 업로드 실패 — GitHub 연결을 확인하세요';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ══════════════════════════════════════════
+   PORTFOLIO IMAGE CHANGE
+══════════════════════════════════════════ */
+function triggerImgChange(btn,wiClass){
+  btn.closest('.img-card').querySelector('input[type=file]').click();
+}
+
+function updateImgTitle(input,wiClass){
+  const newAlt=input.value.trim();
+  const re=new RegExp('(<div[^>]+class="[^"]*\\b'+wiClass+'\\b[^"]*"[^>]*>[\\s\\S]{0,400}?<img[^>]+alt=")[^"]*(")', 'i');
+  if(re.test(htmlText)){
+    htmlText=htmlText.replace(re,'$1'+newAlt+'$2');
+    setHint('img','✦ 제목 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+  }
+}
+
+function deleteWorkItem(btn,wiClass){
+  if(!confirm(wiClass+' 작품을 삭제하시겠어요?\n\n저장 & 배포를 눌러야 홈페이지에 반영됩니다.')) return;
+  // DOMParser로 안전하게 삭제
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const el=doc.querySelector('.work-item.'+wiClass);
+  if(el){ el.remove(); htmlText=doc.documentElement.outerHTML; }
+  btn.closest('.img-card').remove();
+  setHint('img','✦ 삭제됨 — [저장 & 배포]를 눌러 적용하세요');
+  toast('✦ '+wiClass+' 작품이 삭제됐습니다. 저장 & 배포를 눌러주세요.');
+}
+
+function addWorkItem(){
+  if(!htmlText){ toast('먼저 [파일 불러오기]를 눌러주세요.'); return; }
+  // 현재 최대 wi- 번호 파악
+  const nums=[...htmlText.matchAll(/class="work-item wi-(\d+)"/g)].map(m=>+m[1]);
+  const next=(nums.length?Math.max(...nums):0)+1;
+  const wiClass='wi-'+next;
+  // DOMParser로 안전하게 추가
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const workGrid=doc.querySelector('.works-grid');
+  if(workGrid){
+    // 기존 작품과 동일한 구조로 생성 (work-img 래퍼 + work-overlay 포함)
+    const newEl=doc.createElement('div');
+    newEl.className='work-item '+wiClass;
+    newEl.innerHTML=`<div class="work-img"><img src="" alt="새 작품" loading="lazy" style="position:absolute;inset:0;"></div><div class="work-overlay"><p class="work-title">새 작품</p><p class="work-meta"></p></div>`;
+    workGrid.appendChild(newEl);
+    htmlText=doc.documentElement.outerHTML;
+  } else {
+    // 폴백: 정규식
+    const newItem=`\n    <div class="work-item ${wiClass}"><div class="work-img"><img src="" alt="새 작품" loading="lazy" style="position:absolute;inset:0;"></div><div class="work-overlay"><p class="work-title">새 작품</p><p class="work-meta"></p></div></div>`;
+    htmlText=htmlText.replace(/(<\/div>\s*\n?\s*<\/section>)/,newItem+'$1');
+  }
+  // 그리드 CSS 추가 (기본 1:1 비율)
+  if(!htmlText.includes('.'+wiClass+'{')){
+    htmlText=htmlText.replace('</style>',`.${wiClass}{aspect-ratio:1/1}\n</style>`);
+  }
+  populateImages();
+  setHint('img','✦ 작품 추가됨 — 이미지를 선택하고 제목 입력 후 [저장 & 배포]');
+  toast('✦ 새 작품 슬롯('+wiClass+')이 추가됐습니다. 이미지를 선택해 주세요.');
+  // 스크롤을 새로 추가된 카드로 이동
+  setTimeout(()=>{
+    const newCard=document.querySelector('[data-wi="'+wiClass+'"]');
+    if(newCard) newCard.scrollIntoView({behavior:'smooth',block:'center'});
+  },100);
+}
+
+function reorderCards(fromWi,toWi){
+  const grid=document.getElementById('imgGrid');
+  const fromCard=grid.querySelector('[data-wi="'+fromWi+'"]');
+  const toCard=grid.querySelector('[data-wi="'+toWi+'"]');
+  if(!fromCard||!toCard) return;
+  // DOM 순서 교환
+  const allCards=[...grid.children];
+  const fi=allCards.indexOf(fromCard);
+  const ti=allCards.indexOf(toCard);
+  if(fi<ti) toCard.after(fromCard);
+  else toCard.before(fromCard);
+  // htmlText의 work-item 순서도 동일하게 변경
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const wg=doc.querySelector('.works-grid');
+  if(wg){
+    const fromEl=doc.querySelector('.work-item.'+fromWi);
+    const toEl=doc.querySelector('.work-item.'+toWi);
+    if(fromEl&&toEl){
+      const items=[...wg.querySelectorAll('.work-item')];
+      const fIdx=items.indexOf(fromEl);
+      const tIdx=items.indexOf(toEl);
+      if(fIdx<tIdx) toEl.after(fromEl);
+      else toEl.before(fromEl);
+      htmlText=doc.documentElement.outerHTML;
+    }
+  }
+  setHint('img','✦ 순서 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+}
+
+function handleImgChange(input,wiClass){
+  const file=input.files[0]; if(!file) return;
+  if(!htmlText){ toast('먼저 [최신 내용 불러오기]를 눌러주세요.'); return; }
+  const card=input.closest('.img-card');
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const dataUrl=e.target.result;
+    const b64=dataUrl.split(',')[1];
+    const fn=file.name;
+    // 미리보기 즉시 업데이트
+    const prev=card.querySelector('.img-preview')||card.querySelector('.img-expired');
+    if(prev) prev.outerHTML=`<img class="img-preview" src="${dataUrl}" style="height:120px;object-fit:cover;width:100%;display:block"/>`;
+    const newSrc=await uploadImg(fn,b64,wiClass+' 이미지 교체');
+    if(newSrc){
+      // htmlText에서 해당 wi- 클래스 img src 업데이트
+      const re=new RegExp('(<div[^>]+class="[^"]*\\b'+wiClass+'\\b[^"]*"[^>]*>[\\s\\S]{0,300}?<img[^>]+src=")[^"]*(")', 'i');
+      if(re.test(htmlText)){
+        htmlText=htmlText.replace(re,'$1'+newSrc+'$2');
+        setHint('img','✦ 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+      } else {
+        toast('⚠ HTML 구조를 찾을 수 없습니다. 직접 수정이 필요합니다.');
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* 이미지 GitHub 업로드 (공통) */
+async function uploadImg(fn,b64,label){
+  if(cfg.token){
+    try{
+      // 파일명 안전 처리 (한글/공백 등 제거)
+      const safeFn=fn.replace(/[^a-zA-Z0-9._\-]/g,'_');
+      let sha='';
+      try{ const ex=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/images/${safeFn}?ref=${cfg.branch}`); sha=ex.sha; }catch(_){}
+      const body={message:`이미지: ${label} — ${safeFn}`,content:b64,branch:cfg.branch};
+      if(sha) body.sha=sha;
+      const r=await fetch(`${GH_API}/repos/${cfg.owner}/${cfg.repo}/contents/images/${safeFn}`,{
+        method:'PUT', headers:{...ghHeaders(),'Content-Type':'application/json'}, body:JSON.stringify(body)
+      });
+      if(!r.ok){
+        let msg='HTTP '+r.status;
+        try{ const e=await r.json(); msg=e.message||msg; }catch(_){}
+        throw new Error(msg);
+      }
+      toast('✦ 이미지 업로드 완료: '+safeFn);
+      return 'images/'+safeFn;
+    }catch(err){ toast('❌ 업로드 실패: '+err.message); return null; }
+  } else {
+    // 토큰 없음 — 로컬 저장 안내
+    toast('images/ 폴더에 '+fn+' 파일을 직접 저장해주세요.');
+    return 'images/'+fn;
+  }
+}
+
+async function saveImgChanges(){
+  if(!htmlText){ toast('먼저 [파일 불러오기]를 눌러주세요.'); return; }
+  setHint('img','저장 중…');
+  const mode=getMode();
+  if(mode==='github'){
+    try{
+      await commitToGH(htmlText,'포트폴리오 이미지 교체');
+      setHint('img','✦ 저장 완료 — GitHub Pages 자동 배포 중 (약 1분)');
+      toast('✦ 이미지 저장 완료! 1분 후 홈페이지에 반영됩니다.');
+    }catch(e){ setHint('img','저장 실패: '+e.message); toast('저장 실패: '+e.message); }
+  } else if(mode==='local'){
+    const ok=await saveLocal(htmlText);
+    if(ok){ setHint('img','✦ 파일 저장 완료'); toast('✦ 저장 완료!'); }
+  } else {
+    const blob=new Blob([htmlText],{type:'text/html;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='index.html'; a.click();
+    setHint('img','✦ 다운로드됨');
+  }
+}
+
+async function copyPath(pathOrEl){
+  const path = (typeof pathOrEl==='string') ? pathOrEl : (pathOrEl.dataset?.src || pathOrEl);
+  try{
+    await navigator.clipboard.writeText(path);
+    toast("✦ 경로 복사됨");
+  }catch(_){ toast(path+' — 직접 복사하세요'); }
+}
+
+/* ══════════════════════════════════════════
+   CONTACT SECTION
+══════════════════════════════════════════ */
+function populateContact(){
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  // 안내 문구: .contact-text 안의 일반 <p> (class 없는 첫 번째)
+  const ct=doc.querySelector('.contact-text');
+  if(ct){
+    const descP=[...ct.querySelectorAll('p')].find(p=>!p.className);
+    if(descP) document.getElementById('contactDescEd').innerHTML=descP.innerHTML.trim();
+  }
+  // 인스타그램
+  const igLink=doc.querySelector('.contact-link[href*="instagram"]');
+  if(igLink){
+    document.getElementById('contactIgUrl').value=igLink.getAttribute('href')||'';
+    const txt=igLink.textContent||'';
+    const match=txt.match(/@[\w.]+/);
+    document.getElementById('contactIgHandle').value=match?match[0]:txt.trim();
+  }
+  // 이메일
+  const emailLink=doc.querySelector('.contact-link[href^="mailto:"]');
+  if(emailLink){
+    document.getElementById('contactEmail').value=(emailLink.getAttribute('href')||'').replace('mailto:','');
+  }
+  // 기타 연락처
+  const etcLink=doc.querySelector('.contact-link.contact-etc');
+  if(etcLink){
+    document.getElementById('contactEtcLabel').value=etcLink.textContent.trim();
+    document.getElementById('contactEtcUrl').value=etcLink.getAttribute('href')||'';
+  }
+}
+
+async function saveContact(){
+  if(!htmlText){ toast('먼저 [파일 불러오기]를 눌러주세요.'); return; }
+  setHint('contact','저장 중…');
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+
+  // 안내 문구 교체
+  const ct=doc.querySelector('.contact-text');
+  if(ct){
+    const descP=[...ct.querySelectorAll('p')].find(p=>!p.className);
+    if(descP) descP.innerHTML=editorToHtml('contactDescEd');
+  }
+
+  // 인스타그램
+  const igUrl=document.getElementById('contactIgUrl').value.trim()||'https://www.instagram.com/outframe11/';
+  const igHandle=document.getElementById('contactIgHandle').value.trim()||'@outframe11';
+  const igLink=doc.querySelector('.contact-link[href*="instagram"]');
+  if(igLink){
+    igLink.setAttribute('href',igUrl);
+    const textNode=[...igLink.childNodes].find(n=>n.nodeType===3&&n.textContent.includes('@'));
+    if(textNode) textNode.textContent=' Instagram  ·  '+igHandle;
+  }
+
+  // 이메일
+  const emailVal=document.getElementById('contactEmail').value.trim();
+  let emailLink=doc.querySelector('.contact-link[href^="mailto:"]');
+  const linksDiv=doc.querySelector('.contact-links');
+  if(emailVal){
+    if(!emailLink){
+      emailLink=doc.createElement('a');
+      emailLink.className='contact-link';
+      emailLink.setAttribute('target','_blank');
+      emailLink.setAttribute('rel','noopener');
+      emailLink.innerHTML=`<span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span> Email  ·  ${emailVal}`;
+      if(linksDiv) linksDiv.appendChild(emailLink);
+    } else {
+      emailLink.setAttribute('href','mailto:'+emailVal);
+      const span=emailLink.querySelector('.icon');
+      emailLink.textContent='';
+      if(span) emailLink.appendChild(span);
+      emailLink.appendChild(doc.createTextNode(' Email  ·  '+emailVal));
+    }
+    emailLink.setAttribute('href','mailto:'+emailVal);
+  } else if(emailLink){
+    emailLink.remove();
+  }
+
+  // 기타 연락처
+  const etcLabel=document.getElementById('contactEtcLabel').value.trim();
+  const etcUrl=document.getElementById('contactEtcUrl').value.trim();
+  let etcLink=doc.querySelector('.contact-link.contact-etc');
+  if(etcLabel){
+    if(!etcLink){
+      etcLink=doc.createElement('a');
+      etcLink.className='contact-link contact-etc';
+      etcLink.setAttribute('target','_blank');
+      etcLink.setAttribute('rel','noopener');
+      if(linksDiv) linksDiv.appendChild(etcLink);
+    }
+    etcLink.setAttribute('href',etcUrl||'#');
+    etcLink.innerHTML=`<span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> ${etcLabel}`;
+  } else if(etcLink){
+    etcLink.remove();
+  }
+
+  let updated=doc.documentElement.outerHTML;
+  const mode=getMode();
+  if(mode==='github'){
+    try{
+      await commitToGH(updated,'문의 섹션 업데이트');
+      htmlText=updated;
+      setHint('contact','✦ 저장 완료 — GitHub Pages 자동 배포 중 (약 1분)');
+      toast('✦ 저장 완료! 1분 후 홈페이지에 반영됩니다.');
+    }catch(e){ setHint('contact','저장 실패: '+e.message); toast('저장 실패: '+e.message); }
+  } else if(mode==='local'){
+    const ok=await saveLocal(updated);
+    if(ok){ htmlText=updated; setHint('contact','✦ 파일 저장 완료'); toast('✦ 저장 완료!'); }
+  } else {
+    const blob=new Blob([updated],{type:'text/html;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='index.html'; a.click();
+    htmlText=updated; setHint('contact','✦ 다운로드됨'); toast('✦ index.html 다운로드됨');
+  }
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function setHint(sec,msg){
+  if(sec==="all"){["hero","about","stmt","exh","img","contact"].forEach(s=>{ const e=document.getElementById(s+"Hint"); if(e) e.textContent=msg; }); return;}
+  const e=document.getElementById(sec+"Hint"); if(e) e.textContent=msg;
+}
+function toast(msg,ms=3500){ const t=document.getElementById("toast"); t.textContent=msg; t.className="on"; clearTimeout(t._t); t._t=setTimeout(()=>t.className="",ms); }
+function strip(s){ return(s||"").replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").trim(); }
+function esc(s){ return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function b64Dec(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g,"")))); }
+function b64Enc(str){ return btoa(unescape(encodeURIComponent(str))); }
+</script>
+</body>
+</html>
