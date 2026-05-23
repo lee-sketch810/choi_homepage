@@ -316,6 +316,19 @@
           <div class="sec-title">방문자가 처음 보는 큰 인용문</div>
         </div>
         <div class="sec-body">
+          <label class="fl">메인 사진</label>
+          <div style="display:flex;gap:1.2rem;align-items:flex-start;margin-bottom:1.4rem;padding:1rem;background:var(--warm);border:1px solid var(--rule)">
+            <img id="heroImgPreview" src="" alt="메인 사진"
+              style="width:160px;height:120px;object-fit:cover;display:block;background:#C4AF94;flex-shrink:0"
+              onerror="this.style.background='#C4AF94'"/>
+            <div>
+              <p style="font-family:var(--garamond);font-size:.82rem;color:var(--mid);margin-bottom:.8rem;line-height:1.7">
+                홈페이지 상단에 크게 표시되는 메인 사진입니다.<br>새 사진으로 교체하려면 버튼을 누르세요.
+              </p>
+              <button class="btn-outline" onclick="document.getElementById('heroImgInput').click()">✎ 사진 변경</button>
+              <input type="file" id="heroImgInput" accept="image/*" style="display:none" onchange="handleHeroImg(this)"/>
+            </div>
+          </div>
           <label class="fl">인용문 텍스트</label>
           <div class="editor-wrap">
             <div class="editor-toolbar">
@@ -408,19 +421,17 @@
       <div class="sec">
         <div class="sec-head">
           <div class="sec-label">작품 이미지</div>
-          <div class="sec-title">이미지 업로드 &amp; 관리</div>
+          <div class="sec-title">포트폴리오 이미지 교체 &amp; 관리</div>
         </div>
         <div class="sec-body">
-          <div class="img-drop" id="dropZone"
-               ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)"
-               onclick="document.getElementById('imgInput').click()">
-            <div class="img-drop-icon">🖼</div>
-            <div class="img-drop-text">이미지를 여기에 끌어다 놓거나 클릭하여 선택</div>
-            <div class="img-drop-hint">JPG · PNG · WEBP 지원</div>
-            <input type="file" id="imgInput" accept="image/*" multiple onchange="handleFiles(this.files)"/>
-          </div>
-          <div id="uploadStatus" class="img-upload-status"></div>
+          <p style="font-family:var(--garamond);font-size:.82rem;color:var(--light);margin-bottom:1.2rem">
+            각 작품의 <strong style="color:var(--gold)">✎ 변경</strong> 버튼을 눌러 새 이미지 파일을 선택하세요. 모두 교체한 뒤 <strong style="color:var(--gold)">저장 &amp; 배포</strong>를 누르면 홈페이지에 반영됩니다.
+          </p>
           <div id="imgGrid" class="img-grid"></div>
+          <div class="save-bar">
+            <button class="btn-save" onclick="saveImgChanges()">저장 &amp; 배포</button>
+            <span class="save-hint" id="imgHint"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -664,26 +675,41 @@ function populateImages(){
   const grid=document.getElementById("imgGrid");
   grid.innerHTML="";
   const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
-  const imgs=[...doc.querySelectorAll('.work-item img')];
-  if(!imgs.length){
+  const workItems=[...doc.querySelectorAll('.work-item')];
+  if(!workItems.length){
     grid.innerHTML='<p style="font-family:var(--garamond);font-size:.82rem;color:var(--light)">현재 등록된 이미지가 없습니다.</p>';
     return;
   }
-  imgs.forEach((img,i)=>{
+  workItems.forEach((item,i)=>{
+    const img=item.querySelector('img');
+    if(!img) return;
     const src=img.getAttribute('src')||'';
     const alt=img.getAttribute('alt')||('작품 '+(i+1));
-    const shortSrc=src.length>40?'…'+src.slice(-40):src;
+    const wiClass=[...item.classList].find(c=>c.startsWith('wi-'))||('wi-'+(i+1));
     const d=document.createElement('div');
     d.className='img-card';
+    d.dataset.wi=wiClass;
     d.innerHTML=`
-      <img src="${src}" alt="${esc(alt)}" style="height:110px;object-fit:cover;width:100%"
-        onerror="this.style.background='#EDE5D8';this.style.display='flex';this.insertAdjacentHTML('afterend','<div style=\\'height:110px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.75rem;color:#9E9080\\'>이미지 만료됨</div>');this.remove()"/>
+      <div style="position:relative">
+        <img class="img-preview" src="${esc(src)}" alt="${esc(alt)}"
+          style="height:120px;object-fit:cover;width:100%;display:block;background:#EDE5D8"
+          onerror="this.outerHTML='<div class=\\'img-expired\\' style=\\'height:120px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.72rem;color:#9E9080\\'>이미지 만료됨</div>'"/>
+        <div style="position:absolute;top:.3rem;left:.3rem;background:rgba(28,25,20,.75);color:rgba(255,255,255,.85);font-family:var(--garamond);font-size:.62rem;padding:.15rem .4rem;letter-spacing:.08em">${wiClass}</div>
+      </div>
       <div class="img-card-bar">
         <div class="img-card-name">${esc(alt)}</div>
-        <div class="img-card-path" onclick="copyPath(this.dataset.src)" data-src="${esc(src)}" title="클릭하여 경로 복사">📋 경로 복사</div>
-      </div>`;
+        <button onclick="triggerImgChange(this,'${wiClass}')"
+          style="font-family:var(--garamond);font-size:.72rem;color:var(--gold);background:none;border:none;cursor:pointer;padding:.15rem 0;white-space:nowrap;flex-shrink:0">✎ 변경</button>
+      </div>
+      <input type="file" accept="image/*" style="display:none" onchange="handleImgChange(this,'${wiClass}')"/>`;
     grid.appendChild(d);
   });
+  // Hero image preview
+  const heroImgEl=doc.querySelector('.hero-image img');
+  if(heroImgEl){
+    const prev=document.getElementById('heroImgPreview');
+    if(prev) prev.src=heroImgEl.getAttribute('src')||'';
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -984,6 +1010,103 @@ function addImgCard(name,path,src){
   grid.prepend(d);
 }
 
+/* ══════════════════════════════════════════
+   HERO IMAGE CHANGE
+══════════════════════════════════════════ */
+function handleHeroImg(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const dataUrl=e.target.result;
+    const b64=dataUrl.split(',')[1];
+    const fn=file.name;
+    document.getElementById('heroImgPreview').src=dataUrl;
+    const newSrc=await uploadImg(fn,b64,'메인 사진 교체');
+    if(newSrc){
+      htmlText=htmlText.replace(
+        /(<div class="hero-image">[\s\S]{0,200}?<img[^>]+src=")[^"]*(")/,
+        '$1'+newSrc+'$2'
+      );
+      setHint('hero','✦ 사진 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ══════════════════════════════════════════
+   PORTFOLIO IMAGE CHANGE
+══════════════════════════════════════════ */
+function triggerImgChange(btn,wiClass){
+  btn.closest('.img-card').querySelector('input[type=file]').click();
+}
+
+function handleImgChange(input,wiClass){
+  const file=input.files[0]; if(!file) return;
+  const card=input.closest('.img-card');
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const dataUrl=e.target.result;
+    const b64=dataUrl.split(',')[1];
+    const fn=file.name;
+    // 미리보기 즉시 업데이트
+    const prev=card.querySelector('.img-preview')||card.querySelector('.img-expired');
+    if(prev) prev.outerHTML=`<img class="img-preview" src="${dataUrl}" style="height:120px;object-fit:cover;width:100%;display:block"/>`;
+    const newSrc=await uploadImg(fn,b64,wiClass+' 이미지 교체');
+    if(newSrc){
+      // htmlText에서 해당 wi- 클래스 img src 업데이트
+      const re=new RegExp('(<div[^>]+class="[^"]*\\b'+wiClass+'\\b[^"]*"[^>]*>[\\s\\S]{0,300}?<img[^>]+src=")[^"]*(")', 'i');
+      if(re.test(htmlText)){
+        htmlText=htmlText.replace(re,'$1'+newSrc+'$2');
+        setHint('img','✦ 변경됨 — [저장 & 배포]를 눌러 적용하세요');
+      } else {
+        toast('⚠ HTML 구조를 찾을 수 없습니다. 직접 수정이 필요합니다.');
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* 이미지 GitHub 업로드 (공통) */
+async function uploadImg(fn,b64,label){
+  if(cfg.token){
+    try{
+      let sha='';
+      try{ const ex=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/images/${fn}?ref=${cfg.branch}`); sha=ex.sha; }catch(_){}
+      const body={message:`이미지: ${label} — ${fn}`,content:b64,branch:cfg.branch};
+      if(sha) body.sha=sha;
+      const r=await fetch(`${GH_API}/repos/${cfg.owner}/${cfg.repo}/contents/images/${fn}`,{
+        method:'PUT', headers:{...ghHeaders(),'Content-Type':'application/json'}, body:JSON.stringify(body)
+      });
+      if(!r.ok) throw new Error('업로드 실패');
+      toast('✦ 이미지 업로드 완료: '+fn);
+      return 'images/'+fn;
+    }catch(err){ toast('❌ 업로드 실패: '+err.message); return null; }
+  } else {
+    toast('images/ 폴더에 '+fn+' 파일을 직접 저장해주세요.');
+    return 'images/'+fn;
+  }
+}
+
+async function saveImgChanges(){
+  if(!htmlText){ toast('먼저 [파일 불러오기]를 눌러주세요.'); return; }
+  setHint('img','저장 중…');
+  const mode=getMode();
+  if(mode==='github'){
+    try{
+      await commitToGH(htmlText,'포트폴리오 이미지 교체');
+      setHint('img','✦ 저장 완료 — Netlify 자동 배포 중 (약 1분)');
+      toast('✦ 이미지 저장 완료! 1분 후 홈페이지에 반영됩니다.');
+    }catch(e){ setHint('img','저장 실패: '+e.message); toast('저장 실패: '+e.message); }
+  } else if(mode==='local'){
+    const ok=await saveLocal(htmlText);
+    if(ok){ setHint('img','✦ 파일 저장 완료'); toast('✦ 저장 완료!'); }
+  } else {
+    const blob=new Blob([htmlText],{type:'text/html;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='index.html'; a.click();
+    setHint('img','✦ 다운로드됨');
+  }
+}
+
 async function copyPath(pathOrEl){
   const path = (typeof pathOrEl==='string') ? pathOrEl : (pathOrEl.dataset?.src || pathOrEl);
   try{
@@ -996,7 +1119,7 @@ async function copyPath(pathOrEl){
    UTILS
 ══════════════════════════════════════════ */
 function setHint(sec,msg){
-  if(sec==="all"){["hero","about","stmt","exh"].forEach(s=>{ const e=document.getElementById(s+"Hint"); if(e) e.textContent=msg; }); return;}
+  if(sec==="all"){["hero","about","stmt","exh","img"].forEach(s=>{ const e=document.getElementById(s+"Hint"); if(e) e.textContent=msg; }); return;}
   const e=document.getElementById(sec+"Hint"); if(e) e.textContent=msg;
 }
 function toast(msg,ms=3500){ const t=document.getElementById("toast"); t.textContent=msg; t.className="on"; clearTimeout(t._t); t._t=setTimeout(()=>t.className="",ms); }
