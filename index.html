@@ -259,9 +259,17 @@
     <p class="section-title-ko">Artist Statement</p>
     <div class="divider"></div>
 
-                    <p class="about-statement">
+                        <p class="about-statement">
       최경선은 <em>"생명이란 끊임없이 움직이는 것"</em>이라는 생각을 바탕으로
       물의 성질이 느껴지는 회화적 표현을 추구해왔습니다.
+    </p>
+
+    
+
+    <p class="about-statement">
+      화면 속 인물의 동작과 표정, 자연물은 긍정적인 방향으로 전환될 가능성으로
+      충만해 보입니다. 작가는 궁극적으로 <em>연약한 것들의 숭고함</em>을
+      드러내고 싶습니다.
     </p>
 
     
@@ -285,11 +293,7 @@
       혼돈의 상태에서 마침내 순풍과 같은 전향이 감지되는 지점을
       서사적 풍경으로 펼쳐 보여줍니다.
     </p>
-    <p class="about-statement">
-      화면 속 인물의 동작과 표정, 자연물은 긍정적인 방향으로 전환될 가능성으로
-      충만해 보입니다. 작가는 궁극적으로 <em>연약한 것들의 숭고함</em>을
-      드러내고 싶다고 말합니다.
-    </p>
+    
 
     <div class="about-info-grid">
       <div class="about-info-item">
@@ -315,9 +319,7 @@
     <div class="about-profile">
       <img src="images/choi.png" alt="최경선 작가">
     </div>
-    <p style="font-family:var(--garamond);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-align:center;margin-top:.8rem;">
-      Choi Kyung Sun · 최경선
-    </p>
+    <p style="font-family:var(--garamond);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-align:center;margin-top:.8rem;">Choi Kyung Sun · 최경선</p>
   </div>
 </section>
 
@@ -347,7 +349,16 @@
     </div>
 
     <!-- 2: 날개깃 (tall portrait) -->
-    <div class="work-item wi-2">
+    <div class="work-item wi-4">
+      <div class="work-img">
+        <div class="wf-4" style="position:absolute;inset:0;"></div>
+        <img src="https://lh3.googleusercontent.com/PK9cV-fmmAzGIWU5dvP1avy6GIQWsLhT8vXQ3_0ErAqmLqY3Az7VUpeUBifPUfA1btMSRe6byBEb-Ftfk89m9ethbDTyLXn9wJgM2aXCOQLnvafeB7Fy6Q=w900-h700-n" alt="Yellow Birds" style="position:absolute;inset:0;">
+      </div>
+      <div class="work-overlay">
+        <p class="work-title">Yellow Birds</p>
+        <p class="work-meta">38 × 45 cm &nbsp;·&nbsp; Oil on canvas &nbsp;·&nbsp; 2015</p>
+      </div>
+    </div><div class="work-item wi-2">
       <div class="work-img">
         <div class="wf-2" style="position:absolute;inset:0;"></div>
         <img src="https://lh3.googleusercontent.com/WMqKpROfwBL9f2jcF65N8dt9irgErj5h3jDq34u5xxJ_74owMl4OGinDLgzHVl1nS0EIOBo0DPPSlbOBo9TB_MWGql3Dk-5vxFzWpxJLN2uV24wsknAqmQ=w700-h1000-n" alt="날개깃" style="position:absolute;inset:0;">
@@ -371,16 +382,7 @@
     </div>
 
     <!-- 4: Yellow Birds (wide landscape) -->
-    <div class="work-item wi-4">
-      <div class="work-img">
-        <div class="wf-4" style="position:absolute;inset:0;"></div>
-        <img src="https://lh3.googleusercontent.com/PK9cV-fmmAzGIWU5dvP1avy6GIQWsLhT8vXQ3_0ErAqmLqY3Az7VUpeUBifPUfA1btMSRe6byBEb-Ftfk89m9ethbDTyLXn9wJgM2aXCOQLnvafeB7Fy6Q=w900-h700-n" alt="Yellow Birds" style="position:absolute;inset:0;">
-      </div>
-      <div class="work-overlay">
-        <p class="work-title">Yellow Birds</p>
-        <p class="work-meta">38 × 45 cm &nbsp;·&nbsp; Oil on canvas &nbsp;·&nbsp; 2015</p>
-      </div>
-    </div>
+    
 
 
 
@@ -583,9 +585,4 @@
   /* Nav shrink on scroll */
   const nav = document.querySelector('nav');
   window.addEventListener('scroll', () => {
-    nav.style.padding = window.scrollY > 60 ? '1rem 5rem' : '1.4rem 5rem';
-  });
-</script>
-
-
-</body></html>
+    nav.style.padding = window.scrollY > 60 ? '1rem 5rem' : '1.4rem 
