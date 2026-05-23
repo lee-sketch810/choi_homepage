@@ -1082,10 +1082,10 @@ function collectExh(){
 const LABELS={hero:"메인 인용문",about:"작가 소개",stmt:"작가 노트",exh:"전시 이력"};
 
 async function saveSection(sec){
-  if(!htmlText&&cfg.token){ toast("먼저 [최신 내용 불러오기]를 눌러주세요."); return; }
+  if(!htmlText){ toast("먼저 [최신 내용 불러오기]를 눌러주세요."); return; }
   setHint(sec,"저장 중…");
 
-  let updated=htmlText||"";
+  let updated=htmlText;
 
   if(sec==="hero"){
     const v=editorToHtml("heroEd");
@@ -1110,13 +1110,13 @@ async function saveSection(sec){
         (_,pre,post)=>pre+newPhotoUrl.trim()+post
       );
     }
-    // About photo caption
+    // About photo caption — DOMParser로 안전하게 처리
     const newCaption=(document.getElementById('aboutPhotoCaption')||{}).value||'';
     if(newCaption.trim()){
-      updated=updated.replace(
-        /(<div class="about-right[^"]*"[^>]*>[\s\S]*?<\/div>\s*\n\s*<p [^>]*>\s*)([\s\S]*?)(\s*<\/p>\s*\n\s*<\/div>\s*\n<\/section>)/,
-        (_,pre,__,post)=>pre+newCaption.trim()+post
-      );
+      const capDoc=(new DOMParser()).parseFromString(updated,'text/html');
+      const capEl=capDoc.querySelector('.about-right p[style]') || capDoc.querySelector('.about-right p');
+      if(capEl) capEl.textContent=newCaption.trim();
+      updated=capDoc.documentElement.outerHTML;
     }
   }
   if(sec==="stmt"){
@@ -1140,7 +1140,7 @@ async function saveSection(sec){
       <div class="exh-year">${g.year}</div>\n${rows}\n    </div>`;
     }).join("\n\n");
     updated=updated.replace(
-      /(<div class="exh-right[^"]*"[^>]*>)([\s\S]*?)(\s*<\/div>\s*\n<\/section>)/,
+      /(<div class="exh-right[^"]*"[^>]*>)([\s\S]*?)(\s*<\/div>\s*<\/section>)/,
       (_,o,__,c)=>o+"\n\n"+newHtml+"\n\n  "+c.trim()+"\n</section>"
     );
   }
@@ -1267,6 +1267,7 @@ async function compressImage(dataUrl, maxW=1200, quality=0.85){
 
 function handleHeroImg(input){
   const file=input.files[0]; if(!file) return;
+  if(!htmlText){ toast('먼저 [최신 내용 불러오기]를 눌러주세요.'); return; }
   const reader=new FileReader();
   reader.onload=async e=>{
     const compressed=await compressImage(e.target.result);
@@ -1290,6 +1291,7 @@ function handleHeroImg(input){
 ══════════════════════════════════════════ */
 function handleAboutImg(input){
   const file=input.files[0]; if(!file) return;
+  if(!htmlText){ toast('먼저 [최신 내용 불러오기]를 눌러주세요.'); return; }
   const statusEl=document.getElementById('aboutImgStatus');
   const previewEl=document.getElementById('aboutPhotoPreview');
   statusEl.textContent='업로드 중...';
@@ -1346,20 +1348,17 @@ function addWorkItem(){
   const wiClass='wi-'+next;
   // DOMParser로 안전하게 추가
   const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
-  const workGrid=doc.querySelector('.work-grid');
+  const workGrid=doc.querySelector('.works-grid');
   if(workGrid){
+    // 기존 작품과 동일한 구조로 생성 (work-img 래퍼 + work-overlay 포함)
     const newEl=doc.createElement('div');
     newEl.className='work-item '+wiClass;
-    const newImg=doc.createElement('img');
-    newImg.setAttribute('src','');
-    newImg.setAttribute('alt','새 작품');
-    newImg.setAttribute('loading','lazy');
-    newEl.appendChild(newImg);
+    newEl.innerHTML=`<div class="work-img"><img src="" alt="새 작품" loading="lazy" style="position:absolute;inset:0;"></div><div class="work-overlay"><p class="work-title">새 작품</p><p class="work-meta"></p></div>`;
     workGrid.appendChild(newEl);
     htmlText=doc.documentElement.outerHTML;
   } else {
     // 폴백: 정규식
-    const newItem=`\n    <div class="work-item ${wiClass}">\n      <img src="" alt="새 작품" loading="lazy"/>\n    </div>`;
+    const newItem=`\n    <div class="work-item ${wiClass}"><div class="work-img"><img src="" alt="새 작품" loading="lazy" style="position:absolute;inset:0;"></div><div class="work-overlay"><p class="work-title">새 작품</p><p class="work-meta"></p></div></div>`;
     htmlText=htmlText.replace(/(<\/div>\s*\n?\s*<\/section>)/,newItem+'$1');
   }
   // 그리드 CSS 추가 (기본 1:1 비율)
@@ -1389,7 +1388,7 @@ function reorderCards(fromWi,toWi){
   else toCard.before(fromCard);
   // htmlText의 work-item 순서도 동일하게 변경
   const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
-  const wg=doc.querySelector('.work-grid');
+  const wg=doc.querySelector('.works-grid');
   if(wg){
     const fromEl=doc.querySelector('.work-item.'+fromWi);
     const toEl=doc.querySelector('.work-item.'+toWi);
@@ -1407,6 +1406,7 @@ function reorderCards(fromWi,toWi){
 
 function handleImgChange(input,wiClass){
   const file=input.files[0]; if(!file) return;
+  if(!htmlText){ toast('먼저 [최신 내용 불러오기]를 눌러주세요.'); return; }
   const card=input.closest('.img-card');
   const reader=new FileReader();
   reader.onload=async e=>{
