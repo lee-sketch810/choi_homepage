@@ -740,6 +740,9 @@ async function ghGet(path){
 }
 
 async function commitToGH(content,label){
+  // DOCTYPE 보존 — DOMParser 직렬화 시 DOCTYPE이 사라지는 현상 방지
+  if(!content.trim().startsWith('<!')) content='<!DOCTYPE html>\n'+content;
+
   // 항상 최신 SHA를 먼저 가져와서 충돌 방지 (실패 시 에러 발생)
   const cur=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/index.html?ref=${cfg.branch}`);
   indexSHA=cur.sha;
