@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>관리자 · 최경선</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Noto+Serif+KR:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cream:#F4EFE6;--warm:#EDE5D8;--gold:#8C6B3F;--gold-lt:#B8946A;
+      --dark:#1C1914;--mid:#4A4035;--light:#9E9080;--rule:rgba(140,107,63,.2);
+      --serif-ko:'Noto Serif KR',serif;--garamond:'Cormorant Garamond',serif;
+      --serif-en:'Playfair Display',serif;
+    }
+    body{background:#f0ece4;color:var(--dark);font-family:var(--serif-ko);font-weight:300;min-height:100vh}
+
+    /* ── SCREENS ── */
+    .screen{display:none !important}
+    #screen-login.on{display:flex !important;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)}
+    #screen-setup.on{display:flex !important;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)}
+    #screen-admin.on{display:block !important}
+
+    /* ── LOGIN ── */
+    .auth-box{background:var(--cream);padding:3.5rem 3rem;width:380px;text-align:center}
+    .auth-logo{font-family:var(--serif-en);font-size:1.6rem;margin-bottom:.3rem}
+    .auth-sub{font-family:var(--garamond);font-size:.76rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:2rem}
+    .auth-box input[type=password]{
+      width:100%;padding:.9rem;border:1px solid var(--rule);background:#fff;
+      font-size:1.2rem;text-align:center;letter-spacing:.4em;outline:none;margin-bottom:1rem
+    }
+    .auth-box input:focus{border-color:var(--gold)}
+    .err-msg{color:#b04040;font-family:var(--garamond);font-size:.82rem;margin-top:.6rem;display:none}
+
+    /* ── SETUP ── */
+    .setup-box{background:var(--cream);padding:3rem;width:500px}
+    .setup-box h2{font-family:var(--serif-en);font-size:1.3rem;margin-bottom:.5rem}
+    .setup-desc{font-family:var(--garamond);font-size:.85rem;color:var(--mid);line-height:1.8;margin-bottom:1.8rem}
+    .setup-desc a{color:var(--gold);text-decoration:underline}
+
+    /* ── HEADER ── */
+    .adm-header{
+      background:var(--dark);padding:1rem 2rem;
+      display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:100
+    }
+    .adm-brand{font-family:var(--serif-en);color:rgba(255,255,255,.85);font-size:1rem}
+    .adm-brand small{display:block;font-family:var(--garamond);font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-lt);margin-top:.1rem}
+    .adm-nav{display:flex;gap:.5rem;align-items:center}
+    .nav-btn{font-family:var(--garamond);font-size:.76rem;letter-spacing:.15em;text-transform:uppercase;padding:.4rem 1rem;border:none;background:transparent;cursor:pointer}
+    .nav-btn.primary{color:var(--gold-lt);border:1px solid rgba(184,148,106,.3)}
+    .nav-btn.ghost{color:rgba(255,255,255,.35)}
+
+    /* ── TAB BAR ── */
+    .tab-bar{background:var(--dark);border-top:1px solid rgba(255,255,255,.07);display:flex;padding:0 2rem}
+    .tab-btn{
+      font-family:var(--garamond);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;
+      color:rgba(255,255,255,.4);padding:.7rem 1.2rem;background:none;border:none;cursor:pointer;
+      border-bottom:2px solid transparent;transition:all .2s
+    }
+    .tab-btn.active{color:var(--gold-lt);border-bottom-color:var(--gold)}
+
+    /* ── CONTENT ── */
+    .adm-content{max-width:900px;margin:0 auto;padding:2rem 2rem 6rem}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* ── GH STATUS ── */
+    .gh-bar{
+      display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;
+      background:#fff;border:1px solid var(--rule);margin-bottom:1.8rem;
+      font-family:var(--garamond);font-size:.82rem;color:var(--mid)
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--light);flex-shrink:0}
+    .dot.ok{background:#5a9a5a}.dot.err{background:#b04040}
+    .gh-bar .ml{margin-left:auto}
+    .mode-badge{display:inline-block;font-family:var(--garamond);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;padding:.2rem .6rem;border-radius:2px}
+    .mode-local{background:#d4e8d4;color:#3a6b3a}
+    .mode-github{background:#d4dff5;color:#2a4080}
+    .mode-none{background:var(--warm);color:var(--light)}
+
+    /* ── SECTION CARD ── */
+    .sec{background:#fff;border:1px solid var(--rule);margin-bottom:1.5rem;border-radius:2px}
+    .sec-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--rule)}
+    .sec-label{font-family:var(--garamond);font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.2rem}
+    .sec-title{font-family:var(--serif-ko);font-size:.95rem;font-weight:400;color:var(--dark)}
+    .sec-body{padding:1.4rem}
+
+    /* ── WYSIWYG EDITOR ── */
+    .editor-wrap{border:1px solid var(--rule);background:#fff;margin-bottom:.8rem}
+    .editor-toolbar{
+      display:flex;gap:2px;padding:.4rem .6rem;background:var(--warm);border-bottom:1px solid var(--rule);flex-wrap:wrap
+    }
+    .tb{
+      font-family:var(--garamond);font-size:.8rem;padding:.3rem .7rem;
+      background:#fff;border:1px solid var(--rule);cursor:pointer;
+      transition:background .15s;line-height:1;
+    }
+    .tb:hover{background:var(--cream);border-color:var(--gold)}
+    .tb b{font-weight:700}.tb i{font-style:italic}
+    .tb-sep{width:1px;background:var(--rule);margin:0 .3rem}
+    .editor{
+      padding:1rem;min-height:80px;outline:none;
+      font-family:var(--serif-ko);font-size:.93rem;line-height:1.9;color:var(--dark);
+    }
+    .editor em{font-style:italic;color:var(--gold);font-family:var(--garamond);font-size:1.05em}
+    .editor strong{font-weight:600}
+    .editor:focus{background:#fdfbf8}
+    .editor[data-large]{font-family:var(--garamond);font-size:1.15rem;font-style:italic;line-height:1.85;color:var(--mid)}
+
+    /* ── ABOUT PARA CARDS ── */
+    .para-list{margin-bottom:1rem}
+    .para-card{
+      background:#fff;border:1px solid var(--rule);margin-bottom:.8rem;
+      display:flex;gap:0;
+    }
+    .para-drag{
+      width:32px;background:var(--warm);cursor:grab;display:flex;align-items:center;justify-content:center;
+      color:var(--light);font-size:1.1rem;flex-shrink:0;user-select:none
+    }
+    .para-content{flex:1;display:flex;flex-direction:column}
+    .para-editor{
+      padding:.9rem 1rem;outline:none;min-height:70px;
+      font-family:var(--serif-ko);font-size:.9rem;line-height:1.9;color:var(--dark)
+    }
+    .para-editor em{font-style:italic;color:var(--gold);font-family:var(--garamond);font-size:1.05em}
+    .para-editor:focus{background:#fdfbf8}
+    .para-toolbar{
+      display:flex;gap:2px;padding:.35rem .6rem;background:var(--warm);border-top:1px solid var(--rule)
+    }
+    .para-del{margin-left:auto;background:none;border:none;font-family:var(--garamond);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:#b04040;padding:.2rem .5rem}
+
+    /* ── EXHIBITION EDITOR ── */
+    .exh-year-card{border:1px solid var(--rule);margin-bottom:1.2rem;background:#fff}
+    .exh-year-head{
+      display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;
+      background:var(--dark);
+    }
+    .exh-year-num{
+      font-family:var(--garamond);font-size:1.4rem;font-weight:300;color:rgba(255,255,255,.85);
+      background:transparent;border:none;outline:none;width:90px;
+    }
+    .exh-year-num::placeholder{color:rgba(255,255,255,.25)}
+    .exh-del-year{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.15);font-family:var(--garamond);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;color:rgba(255,255,255,.4);padding:.3rem .7rem}
+    .exh-entries{padding:.8rem 1rem}
+    .exh-entry-card{
+      display:grid;grid-template-columns:1fr auto;gap:1rem;
+      padding:.85rem 1rem;border-bottom:1px solid var(--rule);
+      align-items:start
+    }
+    .exh-entry-card:last-child{border-bottom:none}
+    .exh-field-name{
+      font-family:var(--serif-ko);font-size:.95rem;font-weight:400;color:var(--dark);
+      border:none;outline:none;width:100%;background:transparent;padding:.2rem 0;
+      border-bottom:1px solid transparent;transition:border-color .2s
+    }
+    .exh-field-name:focus{border-bottom-color:var(--gold)}
+    .exh-field-name::placeholder{color:var(--light)}
+    .exh-meta{display:flex;gap:.8rem;margin-top:.3rem;flex-wrap:wrap}
+    .exh-field-venue,.exh-field-date{
+      font-family:var(--garamond);font-size:.82rem;color:var(--light);
+      border:none;outline:none;background:transparent;
+      border-bottom:1px dashed var(--rule);transition:border-color .2s;padding:.1rem 0
+    }
+    .exh-field-venue{flex:1;min-width:120px}
+    .exh-field-date{flex:1;min-width:120px}
+    .exh-field-venue:focus,.exh-field-date:focus{border-bottom-color:var(--gold-lt);color:var(--mid)}
+    .exh-field-venue::placeholder,.exh-field-date::placeholder{color:rgba(158,144,128,.5)}
+    .exh-del-entry{background:none;border:none;font-size:1rem;cursor:pointer;color:var(--rule);transition:color .2s;align-self:center}
+    .exh-del-entry:hover{color:#b04040}
+    .exh-add-btn{
+      display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;
+      background:var(--warm);border:none;border-top:1px solid var(--rule);width:100%;
+      font-family:var(--garamond);font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;
+      color:var(--mid);cursor:pointer;transition:background .15s
+    }
+    .exh-add-btn:hover{background:var(--cream);color:var(--gold)}
+
+    /* ── IMAGE GALLERY ── */
+    .img-drop{
+      border:2px dashed var(--gold-lt);padding:3rem;text-align:center;cursor:pointer;
+      background:var(--cream);transition:all .2s;margin-bottom:1.2rem;border-radius:2px
+    }
+    .img-drop:hover,.img-drop.drag-over{background:var(--warm);border-color:var(--gold)}
+    .img-drop-icon{font-size:2.5rem;margin-bottom:.6rem;opacity:.5}
+    .img-drop-text{font-family:var(--garamond);font-size:1rem;color:var(--mid);margin-bottom:.3rem}
+    .img-drop-hint{font-family:var(--garamond);font-size:.8rem;color:var(--light)}
+    .img-drop input[type=file]{display:none}
+    .img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem}
+    .img-card{position:relative;background:var(--warm);border:1px solid var(--rule);overflow:hidden;border-radius:2px}
+    .img-card img{width:100%;height:110px;object-fit:cover;display:block}
+    .img-card-bar{padding:.4rem .6rem;background:#fff;border-top:1px solid var(--rule)}
+    .img-card-name{font-size:.72rem;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem}
+    .img-card-path{
+      font-family:var(--garamond);font-size:.68rem;color:var(--gold);cursor:pointer;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .img-card-path:hover{text-decoration:underline}
+    .img-card-del{position:absolute;top:.3rem;right:.3rem;background:rgba(28,25,20,.6);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+    .img-card:hover .img-card-del{opacity:1}
+    .img-upload-status{font-family:var(--garamond);font-size:.82rem;color:var(--mid);padding:.6rem 0}
+
+    /* ── SAVE BUTTONS ── */
+    .save-bar{display:flex;gap:.8rem;align-items:center;margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--rule)}
+    .btn-save{
+      background:var(--gold);color:#fff;border:none;
+      font-family:var(--garamond);font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;
+      padding:.7rem 2rem;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:.5rem
+    }
+    .btn-save:hover{background:var(--mid)}
+    .btn-save:disabled{background:var(--light);cursor:not-allowed}
+    .btn-add-item{
+      background:transparent;border:1px dashed var(--rule);
+      font-family:var(--garamond);font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;
+      padding:.6rem 1.2rem;cursor:pointer;color:var(--mid);transition:all .2s
+    }
+    .btn-add-item:hover{border-color:var(--gold);color:var(--gold)}
+    .save-hint{font-family:var(--garamond);font-size:.78rem;color:var(--light);margin-left:auto}
+
+    /* ── BUTTONS ── */
+    .btn{font-family:var(--garamond);font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;padding:.7rem 1.6rem;border:none;cursor:pointer;transition:background .2s}
+    .btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--mid)}
+    .btn-outline{background:transparent;border:1px solid var(--rule);color:var(--mid)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+    /* ── TOAST ── */
+    #toast{position:fixed;bottom:2rem;right:2rem;background:var(--dark);color:#fff;font-family:var(--garamond);font-size:.88rem;padding:.85rem 1.8rem;opacity:0;transition:opacity .35s;pointer-events:none;z-index:9999;border-left:3px solid var(--gold)}
+    #toast.on{opacity:1}
+
+    /* ── SPINNER ── */
+    .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:rgba(255,255,255,.85);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    code{background:var(--warm);padding:.1rem .35rem;font-size:.8em;font-family:monospace;border-radius:2px}
+    .fl{display:block;font-family:var(--garamond);font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;margin-top:1.2rem}
+    .fl:first-child{margin-top:0}
+    input[type=text],input[type=password]{
+      width:100%;padding:.7rem .9rem;border:1px solid var(--rule);
+      background:var(--cream);font-family:var(--serif-ko);font-size:.88rem;color:var(--dark);outline:none
+    }
+    input:focus{border-color:var(--gold);background:#fff}
+    .row{display:flex;gap:.8rem;margin-top:1rem}
+  </style>
+</head>
+<body>
+
+<!-- ① 로그인 -->
+<div id="screen-login" class="screen on" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--dark)">
+  <div class="auth-box">
+    <div class="auth-logo">최경선</div>
+    <div class="auth-sub">Admin · 관리자</div>
+    <input type="password" id="pwd" placeholder="비밀번호" autocomplete="current-password"/>
+    <button class="btn btn-gold" style="width:100%;margin-top:.2rem" onclick="doLogin()">로그인</button>
+    <p class="err-msg" id="loginErr">비밀번호가 틀렸습니다.</p>
+  </div>
+</div>
+
+<!-- ② GitHub 설정 -->
+<div id="screen-setup" class="screen">
+  <div class="setup-box">
+    <h2>GitHub 연동 (최초 1회)</h2>
+    <p class="setup-desc">
+      웹에서 저장하려면 GitHub와 연결해야 합니다.<br>
+      <a href="https://github.com/settings/tokens/new?scopes=repo&description=최경선+관리자" target="_blank">👉 GitHub Token 발급</a>
+      — repo 권한 선택 후 생성
+    </p>
+    <label class="fl">GitHub 사용자명</label>
+    <input type="text" id="ghOwner" placeholder="예: choikyoungsun"/>
+    <label class="fl">저장소 이름</label>
+    <input type="text" id="ghRepo" placeholder="예: homepage"/>
+    <label class="fl">Personal Access Token</label>
+    <input type="password" id="ghToken" placeholder="ghp_..."/>
+    <input type="text" id="ghBranch" value="main" style="display:none"/>
+    <div class="row">
+      <button class="btn btn-gold" onclick="saveGhCfg()">연결 확인</button>
+      <button class="btn btn-outline" onclick="goAdmin()">나중에</button>
+    </div>
+    <p id="setupMsg" style="margin-top:.8rem;font-family:var(--garamond);font-size:.82rem;color:var(--mid)"></p>
+  </div>
+</div>
+
+<!-- ③ 관리자 메인 -->
+<div id="screen-admin" class="screen">
+
+  <header class="adm-header">
+    <div class="adm-brand">최경선 <small>관리자 · Admin Panel</small></div>
+    <nav class="adm-nav">
+      <a class="nav-btn primary" href="index.html" target="_blank">홈페이지 보기 →</a>
+      <button class="nav-btn ghost" onclick="openSetup()">⚙ 설정</button>
+      <button class="nav-btn ghost" onclick="location.reload()">로그아웃</button>
+    </nav>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('hero',this)">메인 화면</button>
+    <button class="tab-btn" onclick="switchTab('about',this)">작가 소개</button>
+    <button class="tab-btn" onclick="switchTab('stmt',this)">작가 노트</button>
+    <button class="tab-btn" onclick="switchTab('exh',this)">전시 이력</button>
+    <button class="tab-btn" onclick="switchTab('img',this)">이미지</button>
+  </div>
+
+  <div class="adm-content">
+
+    <!-- GitHub 상태 -->
+    <div class="gh-bar">
+      <span class="dot" id="ghDot"></span>
+      <span id="ghStatusTxt">GitHub 미연결</span>
+      <span id="modeBadge" class="mode-badge mode-none">미연결</span>
+      <button class="nav-btn primary ml" style="font-size:.72rem;padding:.35rem .9rem" onclick="loadContent()">↓ 파일 불러오기</button>
+    </div>
+
+    <!-- ① 메인 화면 -->
+    <div id="tab-hero" class="tab-panel active">
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-label">메인 화면</div>
+          <div class="sec-title">방문자가 처음 보는 큰 인용문</div>
+        </div>
+        <div class="sec-body">
+          <label class="fl">인용문 텍스트</label>
+          <div class="editor-wrap">
+            <div class="editor-toolbar">
+              <button class="tb" onclick="fmt('italic','heroEd')" title="기울임"><i>기울임</i></button>
+              <button class="tb" onclick="fmt('bold','heroEd')" title="굵게"><b>굵게</b></button>
+              <div class="tb-sep"></div>
+              <button class="tb" onclick="insertBr('heroEd')">줄바꿈 삽입</button>
+              <button class="tb" onclick="clearFmt('heroEd')">서식 제거</button>
+            </div>
+            <div class="editor" data-large id="heroEd" contenteditable="true" spellcheck="false"></div>
+          </div>
+          <p style="font-family:var(--garamond);font-size:.78rem;color:var(--light)">
+            텍스트를 선택한 뒤 '기울임'을 클릭하면 금색 기울임 효과가 적용됩니다.
+          </p>
+          <div class="save-bar">
+            <button class="btn-save" onclick="saveSection('hero')">저장 &amp; 배포</button>
+            <span class="save-hint" id="heroHint"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 작가 소개 -->
+    <div id="tab-about" class="tab-panel">
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-label">작가 소개</div>
+          <div class="sec-title">About — 작가 소개 문단들</div>
+        </div>
+        <div class="sec-body">
+          <p style="font-family:var(--garamond);font-size:.82rem;color:var(--light);margin-bottom:1rem">
+            각 박스가 하나의 문단입니다. 텍스트를 직접 클릭해서 편집하세요.
+          </p>
+          <div id="paraList" class="para-list"></div>
+          <button class="btn-add-item" onclick="addPara()">+ 문단 추가</button>
+          <div class="save-bar">
+            <button class="btn-save" onclick="saveSection('about')">저장 &amp; 배포</button>
+            <span class="save-hint" id="aboutHint"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 작가 노트 -->
+    <div id="tab-stmt" class="tab-panel">
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-label">작가 노트</div>
+          <div class="sec-title">어두운 배경의 인용 블록</div>
+        </div>
+        <div class="sec-body">
+          <label class="fl">인용 텍스트</label>
+          <div class="editor-wrap">
+            <div class="editor-toolbar">
+              <button class="tb" onclick="fmt('italic','stmtEd')"><i>기울임</i></button>
+              <button class="tb" onclick="fmt('bold','stmtEd')"><b>굵게</b></button>
+              <div class="tb-sep"></div>
+              <button class="tb" onclick="insertBr('stmtEd')">줄바꿈 삽입</button>
+            </div>
+            <div class="editor" data-large id="stmtEd" contenteditable="true" spellcheck="false"></div>
+          </div>
+          <div class="save-bar">
+            <button class="btn-save" onclick="saveSection('stmt')">저장 &amp; 배포</button>
+            <span class="save-hint" id="stmtHint"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 전시 이력 -->
+    <div id="tab-exh" class="tab-panel">
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-label">전시 이력</div>
+          <div class="sec-title">연도별 전시 · 아트페어 목록</div>
+        </div>
+        <div class="sec-body">
+          <div id="exhList"></div>
+          <button class="btn-add-item" style="width:100%;margin-bottom:1rem" onclick="addExhYear()">+ 새 연도 추가</button>
+          <div class="save-bar">
+            <button class="btn-save" onclick="saveSection('exh')">저장 &amp; 배포</button>
+            <span class="save-hint" id="exhHint"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ 이미지 -->
+    <div id="tab-img" class="tab-panel">
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-label">작품 이미지</div>
+          <div class="sec-title">이미지 업로드 &amp; 관리</div>
+        </div>
+        <div class="sec-body">
+          <div class="img-drop" id="dropZone"
+               ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)"
+               onclick="document.getElementById('imgInput').click()">
+            <div class="img-drop-icon">🖼</div>
+            <div class="img-drop-text">이미지를 여기에 끌어다 놓거나 클릭하여 선택</div>
+            <div class="img-drop-hint">JPG · PNG · WEBP 지원</div>
+            <input type="file" id="imgInput" accept="image/*" multiple onchange="handleFiles(this.files)"/>
+          </div>
+          <div id="uploadStatus" class="img-upload-status"></div>
+          <div id="imgGrid" class="img-grid"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /adm-content -->
+</div><!-- /screen-admin -->
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONSTANTS & STATE
+══════════════════════════════════════════ */
+const PASS   = "1123";
+const GH_API = "https://api.github.com";
+const LS_CFG = "cks_cfg_v2";
+const LS_SHA = "cks_sha";
+
+let cfg        = JSON.parse(localStorage.getItem(LS_CFG)||"{}");
+let indexSHA   = localStorage.getItem(LS_SHA)||"";
+let htmlText   = "";
+let localHandle = null;   // File System Access API handle (로컬 모드)
+
+/* 모드 판단: github | local | none */
+function getMode(){ return cfg.token ? "github" : (window.showOpenFilePicker ? "local" : "none"); }
+
+/* ══════════════════════════════════════════
+   SCREEN SWITCH
+══════════════════════════════════════════ */
+function showScreen(id){
+  ["screen-login","screen-setup","screen-admin"].forEach(s=>{
+    const el=document.getElementById(s);
+    el.classList.remove("on");
+    el.style.display="none";
+  });
+  const target=document.getElementById(id);
+  target.classList.add("on");
+  // 각 화면에 맞는 display 설정
+  if(id==="screen-admin") target.style.display="block";
+  else target.style.display="flex";
+}
+
+/* ══════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════ */
+document.getElementById("pwd").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin()});
+function doLogin(){
+  if(document.getElementById("pwd").value===PASS){
+    goAdmin();
+  } else {
+    document.getElementById("loginErr").style.display="block";
+  }
+}
+
+/* ══════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════ */
+function showSetup(){
+  document.getElementById("ghOwner").value  = cfg.owner||"";
+  document.getElementById("ghRepo").value   = cfg.repo||"";
+  document.getElementById("ghToken").value  = cfg.token||"";
+  document.getElementById("ghBranch").value = cfg.branch||"main";
+  showScreen("screen-setup");
+}
+function openSetup(){ showSetup(); }
+
+async function saveGhCfg(){
+  const owner  = document.getElementById("ghOwner").value.trim();
+  const repo   = document.getElementById("ghRepo").value.trim();
+  const token  = document.getElementById("ghToken").value.trim();
+  const branch = document.getElementById("ghBranch").value.trim()||"main";
+  const msg    = document.getElementById("setupMsg");
+  if(!owner||!repo||!token){ msg.textContent="모든 항목을 입력해주세요."; return; }
+  msg.textContent="연결 확인 중…";
+  try{
+    const res=await fetch(`${GH_API}/repos/${owner}/${repo}`,{headers:ghHeaders(token)});
+    if(!res.ok) throw new Error("저장소를 찾을 수 없습니다.");
+    cfg={owner,repo,token,branch};
+    localStorage.setItem(LS_CFG,JSON.stringify(cfg));
+    msg.textContent="✦ 연결 성공!";
+    setTimeout(goAdmin,700);
+  }catch(e){ msg.textContent="❌ "+e.message; }
+}
+
+function goAdmin(){
+  showScreen("screen-admin");
+  initAdmin();
+}
+
+/* ══════════════════════════════════════════
+   ADMIN INIT
+══════════════════════════════════════════ */
+function initAdmin(){
+  const mode = getMode();
+  const dot  = document.getElementById("ghDot");
+  const txt  = document.getElementById("ghStatusTxt");
+  const badge= document.getElementById("modeBadge");
+
+  if(mode === "github"){
+    dot.className="dot ok";
+    txt.textContent=`GitHub 연결됨 — ${cfg.owner}/${cfg.repo}`;
+    badge.className="mode-badge mode-github"; badge.textContent="GitHub 모드";
+    loadFromGH();
+  } else if(mode === "local"){
+    dot.className="dot ok";
+    txt.textContent="로컬 모드 — [파일 불러오기]를 눌러 index.html을 선택하세요";
+    badge.className="mode-badge mode-local"; badge.textContent="로컬 모드";
+  } else {
+    dot.className="dot err";
+    txt.textContent="이 브라우저는 로컬 파일 접근을 지원하지 않습니다. Chrome을 사용해주세요.";
+    badge.className="mode-badge mode-none"; badge.textContent="미지원";
+  }
+}
+
+/* 통합 불러오기 */
+async function loadContent(){
+  const mode=getMode();
+  if(mode==="github") await loadFromGH();
+  else if(mode==="local") await loadLocal();
+  else toast("Chrome 브라우저에서 이용해주세요.");
+}
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+function switchTab(name,btn){
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("tab-"+name).classList.add("active");
+}
+
+/* ══════════════════════════════════════════
+   LOCAL FILE (File System Access API)
+══════════════════════════════════════════ */
+async function loadLocal(){
+  try{
+    [localHandle] = await window.showOpenFilePicker({
+      types:[{description:"HTML 파일", accept:{"text/html":[".html"]}}],
+      multiple:false
+    });
+    const file = await localHandle.getFile();
+    htmlText   = await file.text();
+    populateForms();
+    document.getElementById("ghStatusTxt").textContent =
+      `로컬 모드 — ${file.name} 불러옴 ✦`;
+    toast("✦ 파일을 불러왔습니다: "+file.name);
+  }catch(e){
+    if(e.name!=="AbortError") toast("파일 열기 실패: "+e.message);
+  }
+}
+
+async function saveLocal(content){
+  if(!localHandle){ toast("먼저 [파일 불러오기]를 눌러 index.html을 선택하세요."); return false; }
+  try{
+    const writable = await localHandle.createWritable();
+    await writable.write(content);
+    await writable.close();
+    return true;
+  }catch(e){
+    // 권한 재요청
+    const perm = await localHandle.requestPermission({mode:"readwrite"});
+    if(perm==="granted"){
+      const writable = await localHandle.createWritable();
+      await writable.write(content);
+      await writable.close();
+      return true;
+    }
+    toast("저장 실패 — 파일 쓰기 권한이 없습니다: "+e.message);
+    return false;
+  }
+}
+
+/* ══════════════════════════════════════════
+   GITHUB
+══════════════════════════════════════════ */
+function ghHeaders(tok){ return { Authorization:`token ${tok||cfg.token}`, Accept:"application/vnd.github.v3+json" }; }
+
+async function loadFromGH(){
+  if(!cfg.token) return;
+  setHint("all","불러오는 중…");
+  try{
+    const data=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/index.html?ref=${cfg.branch}`);
+    htmlText = b64Dec(data.content);
+    indexSHA = data.sha;
+    localStorage.setItem(LS_SHA,indexSHA);
+    populateForms();
+    toast("✦ 최신 내용을 불러왔습니다.");
+    setHint("all","");
+  }catch(e){ toast("불러오기 실패: "+e.message); setHint("all",""); }
+}
+
+async function ghGet(path){
+  const r=await fetch(`${GH_API}/${path}`,{headers:ghHeaders()});
+  if(!r.ok) throw new Error(`GitHub ${r.status}`);
+  return r.json();
+}
+
+async function commitToGH(content,label){
+  const r=await fetch(`${GH_API}/repos/${cfg.owner}/${cfg.repo}/contents/index.html`,{
+    method:"PUT",
+    headers:{...ghHeaders(),"Content-Type":"application/json"},
+    body:JSON.stringify({
+      message:`관리자: ${label} 업데이트`,
+      content:b64Enc(content),
+      sha:indexSHA,
+      branch:cfg.branch
+    })
+  });
+  if(!r.ok){const e=await r.json();throw new Error(e.message);}
+  const d=await r.json();
+  indexSHA=d.content.sha;
+  localStorage.setItem(LS_SHA,indexSHA);
+}
+
+/* ══════════════════════════════════════════
+   POPULATE FORMS
+══════════════════════════════════════════ */
+function populateForms(){
+  // Hero
+  const hq=htmlText.match(/<p class="hero-quote">([\s\S]*?)<\/p>/);
+  if(hq) document.getElementById("heroEd").innerHTML=hq[1].trim();
+
+  // About
+  const paras=[...htmlText.matchAll(/<p class="about-statement">([\s\S]*?)<\/p>/g)].map(m=>m[1].trim());
+  const pl=document.getElementById("paraList"); pl.innerHTML="";
+  paras.forEach(p=>pl.appendChild(mkParaCard(p)));
+
+  // Statement
+  const sq=htmlText.match(/<blockquote>([\s\S]*?)<\/blockquote>/);
+  if(sq) document.getElementById("stmtEd").innerHTML=sq[1].trim();
+
+  // Exhibitions
+  renderExhList(parseExh());
+
+  // Images — 현재 포트폴리오 이미지 표시
+  populateImages();
+}
+
+function populateImages(){
+  const grid=document.getElementById("imgGrid");
+  grid.innerHTML="";
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  const imgs=[...doc.querySelectorAll('.work-item img')];
+  if(!imgs.length){
+    grid.innerHTML='<p style="font-family:var(--garamond);font-size:.82rem;color:var(--light)">현재 등록된 이미지가 없습니다.</p>';
+    return;
+  }
+  imgs.forEach((img,i)=>{
+    const src=img.getAttribute('src')||'';
+    const alt=img.getAttribute('alt')||('작품 '+(i+1));
+    const shortSrc=src.length>40?'…'+src.slice(-40):src;
+    const d=document.createElement('div');
+    d.className='img-card';
+    d.innerHTML=`
+      <img src="${src}" alt="${esc(alt)}" style="height:110px;object-fit:cover;width:100%"
+        onerror="this.style.background='#EDE5D8';this.style.display='flex';this.insertAdjacentHTML('afterend','<div style=\\'height:110px;display:flex;align-items:center;justify-content:center;background:#EDE5D8;font-family:var(--garamond);font-size:.75rem;color:#9E9080\\'>이미지 만료됨</div>');this.remove()"/>
+      <div class="img-card-bar">
+        <div class="img-card-name">${esc(alt)}</div>
+        <div class="img-card-path" onclick="copyPath(this.dataset.src)" data-src="${esc(src)}" title="클릭하여 경로 복사">📋 경로 복사</div>
+      </div>`;
+    grid.appendChild(d);
+  });
+}
+
+/* ══════════════════════════════════════════
+   WYSIWYG EDITOR
+══════════════════════════════════════════ */
+function fmt(cmd,edId){
+  const el=document.getElementById(edId);
+  el.focus();
+  document.execCommand(cmd,false,null);
+}
+function insertBr(edId){
+  const el=document.getElementById(edId);
+  el.focus();
+  document.execCommand("insertHTML",false,"<br>");
+}
+function clearFmt(edId){
+  const el=document.getElementById(edId);
+  el.focus();
+  document.execCommand("removeFormat",false,null);
+}
+
+function editorToHtml(id){
+  let h=document.getElementById(id).innerHTML;
+  // normalize: <div> → <br>, clean up
+  h=h.replace(/<div>/gi,"<br>").replace(/<\/div>/gi,"");
+  h=h.replace(/&nbsp;/g," ");
+  h=h.replace(/\s*<br\s*\/?>\s*/gi,"<br>");
+  h=h.replace(/^<br>/,"").replace(/<br>$/,"");
+  return h.trim();
+}
+
+/* ══════════════════════════════════════════
+   ABOUT PARAGRAPHS
+══════════════════════════════════════════ */
+function mkParaCard(html=""){
+  const d=document.createElement("div");
+  d.className="para-card";
+  d.innerHTML=`
+    <div class="para-drag" title="드래그하여 순서 변경">⠿</div>
+    <div class="para-content">
+      <div class="para-editor" contenteditable="true" spellcheck="false">${html}</div>
+      <div class="para-toolbar">
+        <button class="tb" onclick="paraFmt(this,'italic')"><i>기울임</i></button>
+        <button class="tb" onclick="paraFmt(this,'bold')"><b>굵게</b></button>
+        <button class="tb" onclick="paraFmt(this,'insertHTML','<br>')">줄바꿈</button>
+        <button class="para-del" onclick="this.closest('.para-card').remove()">✕ 삭제</button>
+      </div>
+    </div>`;
+  return d;
+}
+
+function paraFmt(btn,cmd,val){
+  const ed=btn.closest(".para-content").querySelector(".para-editor");
+  ed.focus();
+  if(val) document.execCommand(cmd,false,val);
+  else document.execCommand(cmd,false,null);
+}
+
+function addPara(){ document.getElementById("paraList").appendChild(mkParaCard("")); }
+
+function collectParas(){
+  return [...document.querySelectorAll(".para-editor")].map(e=>{
+    let h=e.innerHTML;
+    h=h.replace(/<div>/gi,"<br>").replace(/<\/div>/gi,"");
+    h=h.replace(/&nbsp;/g," ");
+    return h.trim();
+  }).filter(Boolean);
+}
+
+/* ══════════════════════════════════════════
+   EXHIBITION EDITOR
+══════════════════════════════════════════ */
+function parseExh(){
+  const doc=(new DOMParser()).parseFromString(htmlText,'text/html');
+  return [...doc.querySelectorAll('.exh-year-group')].map(group=>{
+    const year=(group.querySelector('.exh-year')||{}).textContent?.trim()||'';
+    const items=[...group.querySelectorAll('.exh-item')].map(item=>{
+      const nameEl=item.querySelector('.exh-name strong');
+      const name=nameEl?nameEl.textContent.trim():'';
+      const dateEl=item.querySelector('.exh-name span');
+      const date=dateEl?dateEl.textContent.trim():'';
+      const venueEl=item.querySelector('.exh-venue');
+      const venue=venueEl?venueEl.textContent.trim():'';
+      return{name,date,venue};
+    }).filter(i=>i.name);
+    return{year,items};
+  }).filter(g=>g.year);
+}
+
+function renderExhList(list){
+  const el=document.getElementById("exhList");
+  el.innerHTML="";
+  list.forEach(g=>el.appendChild(mkExhYearCard(g)));
+}
+
+function mkExhYearCard({year="",items=[]}){
+  const d=document.createElement("div");
+  d.className="exh-year-card";
+  const rows=items.map(i=>mkExhEntryRow(i)).join("");
+  d.innerHTML=`
+    <div class="exh-year-head">
+      <input class="exh-year-num" type="text" value="${esc(year)}" placeholder="연도 (예: 2025)"/>
+      <button class="exh-del-year" onclick="this.closest('.exh-year-card').remove()">× 연도 삭제</button>
+    </div>
+    <div class="exh-entries">${rows}</div>
+    <button class="exh-add-btn" onclick="addExhEntry(this)">＋ 전시 추가</button>`;
+  return d;
+}
+
+function mkExhEntryRow({name="",venue="",date=""}){
+  return`<div class="exh-entry-card">
+    <div>
+      <input class="exh-field-name" type="text" value="${esc(name)}" placeholder="전시 이름"/>
+      <div class="exh-meta">
+        <input class="exh-field-venue" type="text" value="${esc(venue)}" placeholder="장소 (예: 코엑스, 서울)"/>
+        <input class="exh-field-date"  type="text" value="${esc(date)}"  placeholder="기간 (예: 2025. 9. 3 — 9. 7)"/>
+      </div>
+    </div>
+    <button class="exh-del-entry" onclick="this.closest('.exh-entry-card').remove()" title="삭제">✕</button>
+  </div>`;
+}
+
+function addExhYear(){
+  const el=document.getElementById("exhList");
+  el.insertBefore(mkExhYearCard({year:"",items:[{name:"",venue:"",date:""}]}),el.firstChild);
+}
+
+function addExhEntry(btn){
+  const entries=btn.previousElementSibling;
+  const t=document.createElement("template");
+  t.innerHTML=mkExhEntryRow({});
+  entries.appendChild(t.content);
+}
+
+function collectExh(){
+  return [...document.querySelectorAll(".exh-year-card")].map(c=>{
+    const year=c.querySelector(".exh-year-num").value.trim();
+    const items=[...c.querySelectorAll(".exh-entry-card")].map(r=>({
+      name:  r.querySelector(".exh-field-name").value.trim(),
+      venue: r.querySelector(".exh-field-venue").value.trim(),
+      date:  r.querySelector(".exh-field-date").value.trim()
+    })).filter(i=>i.name);
+    return{year,items};
+  });
+}
+
+/* ══════════════════════════════════════════
+   SAVE SECTIONS
+══════════════════════════════════════════ */
+const LABELS={hero:"메인 인용문",about:"작가 소개",stmt:"작가 노트",exh:"전시 이력"};
+
+async function saveSection(sec){
+  if(!htmlText&&cfg.token){ toast("먼저 [최신 내용 불러오기]를 눌러주세요."); return; }
+  setHint(sec,"저장 중…");
+
+  let updated=htmlText||"";
+
+  if(sec==="hero"){
+    const v=editorToHtml("heroEd");
+    updated=updated.replace(
+      /(<p class="hero-quote">)([\s\S]*?)(<\/p>)/,
+      (_,o,__,c)=>o+"\n      "+v+"\n    "+c
+    );
+  }
+  if(sec==="about"){
+    const paras=collectParas();
+    const existing=[...updated.matchAll(/<p class="about-statement">[\s\S]*?<\/p>/g)];
+    if(existing.length){
+      const nb=paras.map(p=>`    <p class="about-statement">\n      ${p}\n    </p>`).join("\n\n");
+      updated=updated.replace(existing[0][0],nb);
+      for(let i=1;i<existing.length;i++) updated=updated.replace(existing[i][0],"");
+    }
+  }
+  if(sec==="stmt"){
+    const v=editorToHtml("stmtEd");
+    updated=updated.replace(
+      /(<blockquote>)([\s\S]*?)(<\/blockquote>)/,
+      (_,o,__,c)=>o+"\n    "+v+"\n  "+c
+    );
+  }
+  if(sec==="exh"){
+    const list=collectExh();
+    const newHtml=list.map(g=>{
+      const rows=g.items.map(i=>{
+        const ds=i.date?`\n          <br><span style="font-size:.82rem;color:var(--light);">${i.date}</span>`:"";
+        return`      <div class="exh-item">
+        <div class="exh-name"><strong>${i.name}</strong>${ds}</div>
+        <div class="exh-venue">${i.venue}</div>
+      </div>`;
+      }).join("\n");
+      return`    <div class="exh-year-group">
+      <div class="exh-year">${g.year}</div>\n${rows}\n    </div>`;
+    }).join("\n\n");
+    updated=updated.replace(
+      /(<div class="exh-right[^"]*"[^>]*>)([\s\S]*?)(\s*<\/div>\s*\n<\/section>)/,
+      (_,o,__,c)=>o+"\n\n"+newHtml+"\n\n  "+c.trim()+"\n</section>"
+    );
+  }
+
+  const mode=getMode();
+
+  if(mode==="github"){
+    try{
+      await commitToGH(updated,LABELS[sec]||sec);
+      htmlText=updated;
+      setHint(sec,"✦ 저장 완료 — Netlify 자동 배포 중 (약 1분)");
+      toast("✦ 저장 완료! 1분 후 홈페이지에 반영됩니다.");
+    }catch(e){
+      setHint(sec,"저장 실패: "+e.message);
+      toast("저장 실패: "+e.message);
+    }
+  } else if(mode==="local"){
+    const ok = await saveLocal(updated);
+    if(ok){
+      htmlText=updated;
+      setHint(sec,"✦ 파일 저장 완료");
+      toast("✦ 저장 완료! 브라우저에서 index.html을 새로고침해서 확인하세요.");
+    }
+  } else {
+    // 폴백: 다운로드
+    const blob=new Blob([updated],{type:"text/html;charset=utf-8"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="index.html"; a.click();
+    htmlText=updated;
+    setHint(sec,"✦ 다운로드됨 — index.html을 교체하세요");
+    toast("✦ index.html 다운로드됨");
+  }
+}
+
+/* ══════════════════════════════════════════
+   IMAGE UPLOAD
+══════════════════════════════════════════ */
+function dragOver(e){ e.preventDefault(); document.getElementById("dropZone").classList.add("drag-over"); }
+function dragLeave(e){ document.getElementById("dropZone").classList.remove("drag-over"); }
+function dropFiles(e){ e.preventDefault(); document.getElementById("dropZone").classList.remove("drag-over"); handleFiles(e.dataTransfer.files); }
+
+async function handleFiles(files){
+  for(const file of files){
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      const dataUrl=e.target.result;
+      const b64=dataUrl.split(",")[1];
+      const fn=file.name;
+      if(cfg.token){
+        try{
+          let sha="";
+          try{ const ex=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/images/${fn}?ref=${cfg.branch}`); sha=ex.sha; }catch(_){}
+          const body={message:`이미지 업로드: ${fn}`,content:b64,branch:cfg.branch};
+          if(sha) body.sha=sha;
+          await fetch(`${GH_API}/repos/${cfg.owner}/${cfg.repo}/contents/images/${fn}`,{
+            method:"PUT",
+            headers:{...ghHeaders(),"Content-Type":"application/json"},
+            body:JSON.stringify(body)
+          });
+          addImgCard(fn,`images/${fn}`,dataUrl);
+          toast("✦ 업로드 완료: "+fn);
+        }catch(err){ toast("업로드 실패: "+err.message); }
+      } else if(localHandle && window.showOpenFilePicker){
+        // 로컬 모드 — images/ 폴더에 직접 저장
+        try{
+          const dirHandle = await localHandle.getParent?.() ||
+            await window.showDirectoryPicker?.();
+          if(dirHandle){
+            const imgDir = await dirHandle.getDirectoryHandle("images",{create:true});
+            const fh = await imgDir.getFileHandle(fn,{create:true});
+            const w  = await fh.createWritable();
+            await w.write(new Blob([Uint8Array.from(atob(b64),c=>c.charCodeAt(0))]));
+            await w.close();
+            addImgCard(fn,`images/${fn}`,dataUrl);
+            toast("✦ 저장됨: images/"+fn);
+          }
+        }catch(err){
+          // 권한 없으면 다운로드
+          const a=document.createElement("a"); a.href=dataUrl; a.download=fn; a.click();
+          addImgCard(fn,`images/${fn}`,dataUrl);
+          toast("images/ 폴더에 직접 이동해주세요: "+fn);
+        }
+      } else {
+        const a=document.createElement("a"); a.href=dataUrl; a.download=fn; a.click();
+        addImgCard(fn,`images/${fn}`,dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function addImgCard(name,path,src){
+  const grid=document.getElementById("imgGrid");
+  const d=document.createElement("div"); d.className="img-card";
+  d.innerHTML=`
+    <img src="${src}" alt="${name}"/>
+    <div class="img-card-bar">
+      <div class="img-card-name">${name}</div>
+      <div class="img-card-path" onclick="copyPath('images/${name}')" title="클릭하여 경로 복사">
+        📋 경로 복사
+      </div>
+    </div>
+    <button class="img-card-del" onclick="this.closest('.img-card').remove()" title="삭제">✕</button>`;
+  grid.prepend(d);
+}
+
+async function copyPath(pathOrEl){
+  const path = (typeof pathOrEl==='string') ? pathOrEl : (pathOrEl.dataset?.src || pathOrEl);
+  try{
+    await navigator.clipboard.writeText(path);
+    toast("✦ 경로 복사됨");
+  }catch(_){ toast(path+' — 직접 복사하세요'); }
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function setHint(sec,msg){
+  if(sec==="all"){["hero","about","stmt","exh"].forEach(s=>{ const e=document.getElementById(s+"Hint"); if(e) e.textContent=msg; }); return;}
+  const e=document.getElementById(sec+"Hint"); if(e) e.textContent=msg;
+}
+function toast(msg,ms=3500){ const t=document.getElementById("toast"); t.textContent=msg; t.className="on"; clearTimeout(t._t); t._t=setTimeout(()=>t.className="",ms); }
+function strip(s){ return(s||"").replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").trim(); }
+function esc(s){ return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function b64Dec(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g,"")))); }
+function b64Enc(str){ return btoa(unescape(encodeURIComponent(str))); }
+</script>
+</body>
+</html>
