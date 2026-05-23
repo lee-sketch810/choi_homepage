@@ -1,0 +1,597 @@
+<html lang="ko"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>최경선 | CHOI KYOUNG SUN — Fine Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&amp;family=Noto+Serif+KR:wght@300;400;500;600&amp;family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&amp;display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #F4EFE6;
+      --warm:    #EDE5D8;
+      --gold:    #8C6B3F;
+      --gold-lt: #B8946A;
+      --dark:    #1C1914;
+      --mid:     #4A4035;
+      --light:   #9E9080;
+      --rule:    rgba(140,107,63,0.22);
+      --serif-en: 'Playfair Display', Georgia, serif;
+      --serif-ko: 'Noto Serif KR', 'Malgun Gothic', serif;
+      --garamond: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--cream); color: var(--dark); font-family: var(--serif-ko); font-weight: 300; line-height: 1.75; overflow-x: hidden; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 5rem;
+      background: rgba(244,239,230,0.94); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--rule);
+      transition: padding .3s;
+    }
+    .nav-brand .ko { font-family: var(--serif-ko); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.08em; }
+    .nav-brand .en { font-family: var(--garamond); font-size: 0.75rem; font-weight: 300; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a { font-family: var(--garamond); font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mid); position: relative; padding-bottom: 2px; }
+    .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--gold); transition: width .3s; }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ── HERO ── */
+    #hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; padding-top: 72px; }
+    .hero-image { position: relative; overflow: hidden; background: #C4AF94; }
+    .hero-image img { position: absolute; inset: 0; transition: transform 8s ease; }
+    .hero-image:hover img { transform: scale(1.04); }
+    .hero-text { display: flex; flex-direction: column; justify-content: center; padding: 6rem 5rem; }
+    .hero-eyebrow { font-family: var(--garamond); font-size: 0.78rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.6rem; }
+    .hero-title { font-family: var(--serif-en); font-size: clamp(2.8rem, 4vw, 4.8rem); font-weight: 400; line-height: 1.12; margin-bottom: 0.4rem; }
+    .hero-title-ko { font-family: var(--serif-ko); font-size: clamp(1.3rem, 2vw, 2rem); font-weight: 300; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 2.5rem; }
+    .hero-rule { width: 48px; height: 1px; background: var(--gold); margin-bottom: 2rem; }
+    .hero-quote { font-family: var(--garamond); font-size: 1.15rem; font-style: italic; line-height: 1.85; color: var(--mid); max-width: 380px; margin-bottom: 3rem; }
+    .hero-cta { display: inline-flex; align-items: center; gap: 1rem; font-family: var(--garamond); font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase; border-bottom: 1px solid var(--gold); padding-bottom: 4px; width: fit-content; transition: color .2s, gap .2s; }
+    .hero-cta:hover { color: var(--gold); gap: 1.4rem; }
+
+    /* ── SECTIONS ── */
+    section { padding: 7rem 6rem; }
+    .section-label { font-family: var(--garamond); font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+    .section-title { font-family: var(--serif-en); font-size: clamp(2rem, 3vw, 3rem); font-weight: 400; line-height: 1.2; margin-bottom: 0.25rem; }
+    .section-title-ko { font-family: var(--serif-ko); font-size: 0.95rem; font-weight: 300; color: var(--gold-lt); letter-spacing: 0.12em; margin-bottom: 2rem; }
+    .divider { width: 48px; height: 1px; background: var(--gold); margin-bottom: 2.5rem; }
+
+    /* ── ABOUT ── */
+    #about { background: #fff; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+    .about-statement { font-size: 1.02rem; line-height: 2; color: var(--mid); margin-bottom: 1.8rem; }
+    .about-statement em { font-style: italic; color: var(--gold); font-family: var(--garamond); font-size: 1.12rem; }
+    .about-profile { aspect-ratio: 3/4; max-height: 480px; overflow: hidden; background: var(--warm); position: relative; margin-bottom: 1.5rem; }
+    .about-profile img { object-fit: cover; }
+    .about-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+    .about-info-item .label { font-family: var(--garamond); font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+    .about-info-item .value { font-size: 0.88rem; color: var(--dark); line-height: 1.65; }
+
+    /* ── WORKS ── */
+    #works { background: var(--cream); }
+    .works-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 3rem; }
+
+    /* 3-column masonry-style grid */
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 1rem;
+    }
+    .work-item { position: relative; overflow: hidden; background: var(--warm); cursor: pointer; }
+    .work-item:hover .work-overlay { opacity: 1; }
+    .work-item:hover .work-img img { transform: scale(1.06); }
+
+    /* layout positions */
+    .wi-1 { grid-column: 1 / 3; grid-row: 1; aspect-ratio: 4/3; }
+    .wi-2 { grid-column: 3 / 4; grid-row: 1; aspect-ratio: 3/4; }
+    .wi-3 { grid-column: 1 / 2; grid-row: 2; aspect-ratio: 3/4; }
+    .wi-4 { grid-column: 2 / 4; grid-row: 2; aspect-ratio: 4/3; }
+    .wi-5 { grid-column: 1 / 2; grid-row: 3; aspect-ratio: 1/1; }
+    .wi-6 { grid-column: 2 / 3; grid-row: 3; aspect-ratio: 1/1; }
+    .wi-7 { grid-column: 3 / 4; grid-row: 3; aspect-ratio: 1/1; }
+    .wi-8 { grid-column: 1 / 3; grid-row: 4; aspect-ratio: 4/3; }
+    .wi-9 { grid-column: 3 / 4; grid-row: 4; aspect-ratio: 3/4; }
+
+    .work-img { position: absolute; inset: 0; }
+    .work-img img { transition: transform .6s ease; }
+
+    /* colour-block fallbacks — each unique */
+    .wf-1 { background: linear-gradient(140deg, #C9B48E 0%, #8C6B40 50%, #4A3520 100%); }
+    .wf-2 { background: linear-gradient(200deg, #9BBAC8 0%, #5D8EA0 45%, #284B5E 100%); }
+    .wf-3 { background: linear-gradient(110deg, #D6C09A 0%, #B89466 40%, #7A6040 100%); }
+    .wf-4 { background: linear-gradient(160deg, #B0C8D4 0%, #6E96A6 50%, #324C5A 100%); }
+    .wf-5 { background: linear-gradient(135deg, #C4A87C 0%, #9A7A52 40%, #5E4830 100%); }
+
+    .work-overlay { position: absolute; inset: 0; background: rgba(28,25,20,.76); display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; padding: 2rem; opacity: 0; transition: opacity .4s; }
+    .work-overlay .work-title { font-family: var(--serif-ko); font-size: 1.05rem; font-weight: 400; color: #fff; margin-bottom: 0.3rem; }
+    .work-overlay .work-meta { font-family: var(--garamond); font-size: 0.82rem; letter-spacing: 0.08em; color: rgba(255,255,255,.65); }
+
+    /* ── STATEMENT STRIP ── */
+    #statement { background: var(--dark); padding: 6rem 10rem; text-align: center; }
+    #statement blockquote { font-family: var(--garamond); font-size: clamp(1.3rem, 2.2vw, 2rem); font-style: italic; line-height: 1.9; color: rgba(255,255,255,.88); max-width: 860px; margin: 0 auto 2rem; }
+    #statement cite { font-family: var(--garamond); font-size: 0.76rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold-lt); font-style: normal; }
+
+    /* ── EXHIBITIONS ── */
+    #exhibitions { background: var(--warm); display: grid; grid-template-columns: 1fr 2fr; gap: 5rem; }
+    .exh-left { position: sticky; top: 110px; align-self: start; background: var(--warm); z-index: 1; }
+    .exh-year-group { margin-bottom: 2.5rem; }
+    .exh-year { font-family: var(--garamond); font-size: 2rem; font-weight: 300; color: var(--gold); border-bottom: 1px solid var(--rule); padding-bottom: .5rem; margin-bottom: 1rem; }
+    .exh-badge { display: inline-block; font-family: var(--garamond); font-size: 0.64rem; letter-spacing: 0.18em; text-transform: uppercase; background: var(--gold); color: #fff; padding: 1px 7px; margin-left: 8px; vertical-align: middle; }
+    .exh-item { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid var(--rule); }
+    .exh-item:last-child { border-bottom: none; }
+    .exh-name { font-size: .93rem; color: var(--dark); line-height: 1.5; }
+    .exh-name strong { font-weight: 500; display: block; }
+    .exh-venue { font-family: var(--garamond); font-size: .82rem; letter-spacing: .04em; color: var(--light); text-align: right; white-space: nowrap; }
+
+    /* ── ACTIVITIES ── */
+    #activities { background: #fff; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+    .activity-group h3 { font-family: var(--garamond); font-size: .72rem; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
+    .activity-group ul { list-style: none; border-top: 1px solid var(--rule); }
+    .activity-group ul li { padding: .8rem 0; border-bottom: 1px solid var(--rule); font-size: .9rem; color: var(--mid); display: flex; align-items: center; gap: .75rem; }
+    .activity-group ul li::before { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+
+    /* ── KIAF BANNER ── */
+    #kiaf-banner {
+      background: var(--dark);
+      padding: 3.5rem 6rem;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      border-top: 1px solid rgba(140,107,63,.35);
+    }
+    .kiaf-logo-area {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: .4rem;
+    }
+    .kiaf-logo-area .kiaf-tag {
+      font-family: var(--garamond);
+      font-size: .65rem;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+    }
+    .kiaf-logo-area .kiaf-title {
+      font-family: var(--serif-en);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: rgba(255,255,255,.9);
+      letter-spacing: .04em;
+    }
+    .kiaf-divider { width: 1px; height: 60px; background: rgba(255,255,255,.12); flex-shrink: 0; }
+    .kiaf-desc {
+      font-family: var(--garamond);
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(255,255,255,.6);
+      max-width: 700px;
+    }
+    .kiaf-desc strong { color: rgba(255,255,255,.85); font-weight: 400; }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--cream); display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .contact-text p { font-size: .95rem; color: var(--mid); line-height: 1.9; margin-bottom: 1.5rem; }
+    .contact-links { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-link { display: flex; align-items: center; gap: 1rem; font-family: var(--garamond); font-size: .92rem; letter-spacing: .1em; color: var(--dark); padding: 1.1rem 1.6rem; border: 1px solid rgba(140,107,63,.45); background: var(--warm); transition: border-color .25s, background .25s, box-shadow .25s; text-decoration: none; }
+    .contact-link:hover { border-color: var(--gold); background: var(--cream); box-shadow: 0 2px 12px rgba(140,107,63,.12); }
+    .contact-link .icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--dark); padding: 2.8rem 6rem; display: flex; align-items: center; justify-content: space-between; }
+    .footer-brand { font-family: var(--serif-en); font-size: 1.2rem; color: rgba(255,255,255,.8); }
+    .footer-brand span { display: block; font-family: var(--garamond); font-size: .7rem; letter-spacing: .28em; text-transform: uppercase; color: var(--gold-lt); margin-top: .2rem; }
+    .footer-copy { font-family: var(--garamond); font-size: .75rem; letter-spacing: .12em; color: rgba(255,255,255,.32); }
+
+    /* ── ANIMATIONS ── */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity .75s ease, transform .75s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1.2rem 2rem; }
+      .nav-links { gap: 1.5rem; }
+      #hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-image { aspect-ratio: 4/3; position: relative; }
+      .hero-text { padding: 3rem 2rem; }
+      section { padding: 4rem 2rem; }
+      #about, #contact, #activities { grid-template-columns: 1fr; gap: 3rem; }
+      #exhibitions { grid-template-columns: 1fr; gap: 2rem; }
+      .works-grid { grid-template-columns: 1fr; }
+      .wi-1,.wi-2,.wi-3,.wi-4,.wi-5,.wi-6,.wi-7,.wi-8,.wi-9 { grid-column: 1; grid-row: auto; aspect-ratio: 4/3; position: relative; height: 260px; }
+      #statement { padding: 4rem 2rem; }
+      #kiaf-banner { flex-direction: column; padding: 3rem 2rem; gap: 1.5rem; }
+      .kiaf-divider { display: none; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; padding: 2.5rem 2rem; }
+    }
+  .wi-5{aspect-ratio:1/1}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="ko">최 경 선</div>
+    <div class="en">Choi Kyung Sun · Fine Art</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#works">Works</a></li>
+    <li><a href="#exhibitions">Exhibitions</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-image">
+    <img src="https://scontent-ssn1-1.cdninstagram.com/v/t51.82787-15/587326266_18069092492607572_1716561653995452888_n.jpg?stp=dst-jpg_e35_s640x640_sh2.08_tt6&amp;_nc_ht=scontent-ssn1-1.cdninstagram.com&amp;_nc_cat=108&amp;_nc_oc=Q6cZ2gGLZxwWlFixGeKf6KtX3gnt3rS2r0e6-cHCGNPWCu0_S6qw5I2DCmuXubcyt21rI1abbidloaIoO7VLNutWrDG6&amp;_nc_ohc=lHfX4NjQMCcQ7kNvwEPrJYi&amp;_nc_gid=jiKVOZdNeHuyL1fHD30C1Q&amp;edm=AOQ1c0wBAAAA&amp;ccb=7-5&amp;oh=00_Af4PE5abSwktWnX7GLxm8ssoh2McZuCymfUv5T7IjNKQOg&amp;oe=6A16C63E&amp;_nc_sid=8b3546" alt="허밍 시리즈 · 최경선 · 2025">
+  </div>
+  <div class="hero-text">
+    <p class="hero-eyebrow">Painter · Oil &amp; Watercolour</p>
+    <h1 class="hero-title">Choi<br>Kyung Sun</h1>
+    <p class="hero-title-ko">최 경 선</p>
+    <div class="hero-rule"></div>
+    <p class="hero-quote">
+      "삶의 순간에 느낀 미동(微動)이<br>미동(美動)으로 나아가게 하는 것이 예술이다.<br>연약한 것들의 숭고함을 드러내고 싶다."
+    </p>
+    <a class="hero-cta" href="#works">View Works &nbsp;→</a>
+  
+    <div class="work-item wi-5">
+      <img src="images/edited_20260523_215708.png" alt="새 작품" loading="lazy"/>
+    </div></div>
+</section>
+
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-left fade-in">
+    <p class="section-label">About the Artist</p>
+    <h2 class="section-title">작가 소개</h2>
+    <p class="section-title-ko">Artist Statement</p>
+    <div class="divider"></div>
+
+                    <p class="about-statement">
+      최경선은 <em>"생명이란 끊임없이 움직이는 것"</em>이라는 생각을 바탕으로
+      물의 성질이 느껴지는 회화적 표현을 추구해왔습니다.
+    </p>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <p class="about-statement">
+      일상에서 긍정적인 변화에 주목하면서, 어떤 실체가 드러나기 직전의 상태—
+      <em>'변화의 첫 조짐'</em>을 그림에 담고자 합니다.
+      혼돈의 상태에서 마침내 순풍과 같은 전향이 감지되는 지점을
+      서사적 풍경으로 펼쳐 보여줍니다.
+    </p>
+    <p class="about-statement">
+      화면 속 인물의 동작과 표정, 자연물은 긍정적인 방향으로 전환될 가능성으로
+      충만해 보입니다. 작가는 궁극적으로 <em>연약한 것들의 숭고함</em>을
+      드러내고 싶다고 말합니다.
+    </p>
+
+    <div class="about-info-grid">
+      <div class="about-info-item">
+        <div class="label">Born</div>
+        <div class="value">1972년, 서울</div>
+      </div>
+      <div class="about-info-item">
+        <div class="label">Medium</div>
+        <div class="value">Oil on Canvas<br>Watercolour</div>
+      </div>
+      <div class="about-info-item">
+        <div class="label">Education</div>
+        <div class="value">홍익대학교 회화과 B.F.A.<br>홍익대학교 대학원 M.F.A.</div>
+      </div>
+      <div class="about-info-item">
+        <div class="label">Solo Shows</div>
+        <div class="value">9회 개인전</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-right fade-in">
+    <div class="about-profile">
+      <img src="https://scontent-ssn1-1.cdninstagram.com/v/t51.82787-15/606491413_18070510748607572_8728383811239806487_n.jpg?stp=dst-jpg_e35_p640x640_sh2.08_tt6&amp;_nc_ht=scontent-ssn1-1.cdninstagram.com&amp;_nc_cat=108&amp;_nc_oc=Q6cZ2gGLZxwWlFixGeKf6KtX3gnt3rS2r0e6-cHCGNPWCu0_S6qw5I2DCmuXubcyt21rI1abbidloaIoO7VLNutWrDG6&amp;_nc_ohc=yVovjQH9IjEQ7kNvwFU9hNa&amp;_nc_gid=jiKVOZdNeHuyL1fHD30C1Q&amp;edm=AOQ1c0wBAAAA&amp;ccb=7-5&amp;oh=00_Af5QBO7u0nOOG8o5PiWl4Y9UbE0EXjR6x0S1avMUTRvdDg&amp;oe=6A16BB80&amp;_nc_sid=8b3546" alt="허밍 시리즈 · 최경선 · 2025">
+    </div>
+    <p style="font-family:var(--garamond);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-align:center;margin-top:.8rem;">
+      Choi Kyung Sun · 최경선
+    </p>
+  </div>
+</section>
+
+
+<!-- WORKS -->
+<section id="works">
+  <div class="works-header fade-in">
+    <div>
+      <p class="section-label">Selected Works</p>
+      <h2 class="section-title">작품 선집</h2>
+      <p class="section-title-ko">Portfolio</p>
+    </div>
+  </div>
+
+  <div class="works-grid fade-in">
+
+    <!-- 1: 미동 (large landscape) -->
+    <div class="work-item wi-1">
+      <div class="work-img">
+        <div class="wf-1" style="position:absolute;inset:0;"></div>
+        <img src="https://lh3.googleusercontent.com/iNm6i5HPATBqGgzqIDtLYy8n0csI6T04wngD5ICq2PyHw1BUibu3VdpRgMAOVJuwptK_9kzQnfipU_JHiKVoBI9WCYQUeUUbW4IswhPc7Q=w1000-h750-n" alt="미동" style="position:absolute;inset:0;">
+      </div>
+      <div class="work-overlay">
+        <p class="work-title">미동 (微動)</p>
+        <p class="work-meta">41 × 53 cm &nbsp;·&nbsp; Oil on canvas &nbsp;·&nbsp; 2020</p>
+      </div>
+    </div>
+
+    <!-- 2: 날개깃 (tall portrait) -->
+    <div class="work-item wi-2">
+      <div class="work-img">
+        <div class="wf-2" style="position:absolute;inset:0;"></div>
+        <img src="https://lh3.googleusercontent.com/WMqKpROfwBL9f2jcF65N8dt9irgErj5h3jDq34u5xxJ_74owMl4OGinDLgzHVl1nS0EIOBo0DPPSlbOBo9TB_MWGql3Dk-5vxFzWpxJLN2uV24wsknAqmQ=w700-h1000-n" alt="날개깃" style="position:absolute;inset:0;">
+      </div>
+      <div class="work-overlay">
+        <p class="work-title">날개깃</p>
+        <p class="work-meta">37.6 × 45.3 cm &nbsp;·&nbsp; Oil on canvas &nbsp;·&nbsp; 2021</p>
+      </div>
+    </div>
+
+    <!-- 3: 당신의 걸음따라 (tall) -->
+    <div class="work-item wi-3">
+      <div class="work-img">
+        <div class="wf-3" style="position:absolute;inset:0;"></div>
+        <img src="https://lh3.googleusercontent.com/mp5XTwreDWtcAngj2fqoUHjHqduq6KkFnCJJGzGHRCvQTAu1Yqi0DHzcUr03Ks3eCU6i-PC2qJRpWU8lQGxSSG4hk1fQ9kNAaeYj6craeg=w700-h900-n" alt="당신의 걸음따라" style="position:absolute;inset:0;">
+      </div>
+      <div class="work-overlay">
+        <p class="work-title">당신의 걸음따라</p>
+        <p class="work-meta">45.2 × 37.6 cm &nbsp;·&nbsp; Oil on canvas &nbsp;·&nbsp; 2020</p>
+      </div>
+    </div>
+
+    <!-- 4: Yellow Birds (wide landscape) -->
+    <div class="work-item wi-4">
+      <div class="work-img">
+        <div class="wf-4" style="position:absolute;inset:0;"></div>
+        <img src="https://lh3.googleusercontent.com/PK9cV-fmmAzGIWU5dvP1avy6GIQWsLhT8vXQ3_0ErAqmLqY3Az7VUpeUBifPUfA1btMSRe6byBEb-Ftfk89m9ethbDTyLXn9wJgM2aXCOQLnvafeB7Fy6Q=w900-h700-n" alt="Yellow Birds" style="position:absolute;inset:0;">
+      </div>
+      <div class="work-overlay">
+        <p class="work-title">Yellow Birds</p>
+        <p class="work-meta">38 × 45 cm &nbsp;·&nbsp; Oil on canvas &nbsp;·&nbsp; 2015</p>
+      </div>
+    </div>
+
+
+
+    <!-- 5: 허밍 시리즈 2025 -->
+    
+
+    <!-- 6: 허밍 시리즈 2025 -->
+    
+
+    <!-- 7: 허밍 시리즈 2025 -->
+    
+
+    <!-- 8: 허밍 시리즈 2025 (wide) -->
+    
+
+    <!-- 9: 허밍 시리즈 2025 (tall) -->
+    
+
+  </div>
+</section>
+
+
+<!-- STATEMENT STRIP -->
+<section id="statement">
+  <blockquote>
+    "삶의 순간에 느낀 미동(微動)이<br>
+    미동(美動)으로 나아가게 하는 것이 예술이다.<br>
+    연약한 것들의 숭고함을 드러내고 싶다."
+  </blockquote>
+  <cite>— 최경선 작가 노트</cite>
+</section>
+
+
+<!-- EXHIBITIONS -->
+<section id="exhibitions">
+  <div class="exh-left fade-in">
+    <p class="section-label">Exhibition History</p>
+    <h2 class="section-title">전시 이력</h2>
+    <p class="section-title-ko">Solo &amp; Group</p>
+    <div class="divider"></div>
+    <p style="font-size:.88rem;color:var(--light);line-height:1.9;">
+      2001년 서울 첫 개인전부터<br>
+      베이징·천안·서울을 거쳐<br>
+      자하미술관·CN갤러리까지<br>
+      20여 년의 전시 여정.
+    </p>
+  </div>
+
+  <div class="exh-right fade-in">
+
+    <div class="exh-year-group">
+      <div class="exh-year">2025</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>작은 치유의 장면들</strong>
+          <br><span style="font-size:.82rem;color:var(--light);">2025. 12. 11 — 2026. 2. 4</span></div>
+        <div class="exh-venue">신세계백화점 본점 3층, 서울</div>
+      </div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>Kiaf SEOUL 2025</strong>
+          <br><span style="font-size:.82rem;color:var(--light);">2025. 9. 3 — 9. 7</span></div>
+        <div class="exh-venue">COEX A78, 서울</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2023</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>4인 4색</strong>
+          <br><span style="font-size:.82rem;color:var(--light);">2023. 2. 28 — 3. 10</span></div>
+        <div class="exh-venue">CN갤러리, 서울</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2021</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>날개깃</strong></div>
+        <div class="exh-venue">아트하라 (예술하라)</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2020</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>미동 (微動)</strong>
+          <br><span style="font-size:.82rem;color:var(--light);">2020. 6. 5 — 6. 30</span></div>
+        <div class="exh-venue">자하미술관, 서울</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2019</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>生·물(水)</strong></div>
+        <div class="exh-venue">나무화랑, 서울</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2017</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>귀가</strong></div>
+        <div class="exh-venue">창룡마을창작센터, 경기</div>
+      </div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>비오톱의 저녁</strong></div>
+        <div class="exh-venue">나무화랑, 서울</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2015</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>흐르는 빛</strong></div>
+        <div class="exh-venue">오산시립미술관, 경기</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2012</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>실존의 포에지 (poesie)</strong></div>
+        <div class="exh-venue">관훈갤러리, 서울</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2009–10</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>유년의 잔치</strong></div>
+        <div class="exh-venue">갤러리아트사이드, 베이징</div>
+      </div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>허욕의 자리</strong></div>
+        <div class="exh-venue">T Art Center, 베이징</div>
+      </div>
+    </div>
+
+    <div class="exh-year-group">
+      <div class="exh-year">2001</div>
+      <div class="exh-item">
+        <div class="exh-name"><strong>RETURN</strong></div>
+        <div class="exh-venue">덕원갤러리, 서울</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-text fade-in">
+    <p class="section-label">Contact</p>
+    <h2 class="section-title">문의</h2>
+    <p class="section-title-ko">Get in Touch</p>
+    <div class="divider"></div>
+    <p>작품 구매, 전시 협력, 강의 및 기타 문의를 환영합니다.<br>다음 채널을 통해 편하게 연락해 주세요.</p>
+    <p style="font-family:var(--garamond);font-size:.85rem;color:var(--light);font-style:italic;">
+      Works available for acquisition · 작품 문의 가능
+    </p>
+  </div>
+
+  <div class="contact-links fade-in">
+
+    <a class="contact-link" href="https://www.instagram.com/outframe11/" target="_blank" rel="noopener">
+      <span class="icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="20" height="20" rx="5"></rect>
+          <circle cx="12" cy="12" r="4"></circle>
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle>
+        </svg>
+      </span>
+      Instagram &nbsp;· &nbsp;@outframe11
+    </a>
+
+
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    Choi Kyung Sun
+    <span>최경선 · Fine Art</span>
+  </div>
+  <div class="footer-copy">© 2026 Choi Kyung Sun. All rights reserved.</div>
+</footer>
+
+
+<script>
+  /* Scroll fade-in */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  /* Nav shrink on scroll */
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.padding = window.scrollY > 60 ? '1rem 5rem' : '1.4rem 5rem';
+  });
+</script>
+
+
+</body></html>
