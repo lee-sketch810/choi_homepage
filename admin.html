@@ -129,6 +129,13 @@
       display:flex;gap:2px;padding:.35rem .6rem;background:var(--warm);border-top:1px solid var(--rule)
     }
     .para-del{margin-left:auto;background:none;border:none;font-family:var(--garamond);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:#b04040;padding:.2rem .5rem}
+    .color-palette{display:none;flex-wrap:wrap;align-items:center;gap:.35rem;padding:.4rem .6rem .5rem;background:var(--cream);border-top:1px solid var(--rule)}
+    .color-swatch{width:20px;height:20px;border:2px solid transparent;border-radius:50%;cursor:pointer;padding:0;transition:transform .15s,border-color .15s;flex-shrink:0}
+    .color-swatch:hover{transform:scale(1.25);border-color:rgba(0,0,0,.25)}
+    .color-custom{width:22px;height:22px;padding:0;border:1px solid var(--rule);cursor:pointer;border-radius:50%;overflow:hidden;flex-shrink:0}
+    .color-label{font-family:var(--garamond);font-size:.7rem;color:var(--light);letter-spacing:.08em}
+    .btn-remove-color{background:none;border:1px solid var(--rule);font-family:var(--garamond);font-size:.7rem;letter-spacing:.08em;cursor:pointer;color:var(--mid);padding:.15rem .5rem;border-radius:2px}
+    .btn-remove-color:hover{border-color:var(--gold);color:var(--gold)}
 
     /* ── EXHIBITION EDITOR ── */
     .exh-year-card{border:1px solid var(--rule);margin-bottom:1.2rem;background:#fff}
@@ -902,7 +909,20 @@ function mkParaCard(html=""){
         <button class="tb" onclick="paraFmt(this,'italic')"><i>기울임</i></button>
         <button class="tb" onclick="paraFmt(this,'bold')"><b>굵게</b></button>
         <button class="tb" onclick="paraFmt(this,'insertHTML','<br>')">줄바꿈</button>
+        <button class="tb" onclick="toggleColorPalette(this)" title="글자 색상" style="color:var(--gold)">🎨 색상</button>
         <button class="para-del" onclick="this.closest('.para-card').remove()">✕ 삭제</button>
+      </div>
+      <div class="color-palette">
+        <span class="color-label">색상 선택:</span>
+        <button class="color-swatch" style="background:#8C6B3F" title="골드" onclick="paraColor(this,'#8C6B3F')"></button>
+        <button class="color-swatch" style="background:#B8946A" title="연한 골드" onclick="paraColor(this,'#B8946A')"></button>
+        <button class="color-swatch" style="background:#4A4035" title="브라운" onclick="paraColor(this,'#4A4035')"></button>
+        <button class="color-swatch" style="background:#1C1914" title="다크" onclick="paraColor(this,'#1C1914')"></button>
+        <button class="color-swatch" style="background:#9E9080" title="회색" onclick="paraColor(this,'#9E9080')"></button>
+        <button class="color-swatch" style="background:#C0392B" title="레드" onclick="paraColor(this,'#C0392B')"></button>
+        <button class="color-swatch" style="background:#2C5F8A" title="블루" onclick="paraColor(this,'#2C5F8A')"></button>
+        <input type="color" class="color-custom" value="#8C6B3F" title="직접 선택" onchange="paraColor(this,this.value)">
+        <button class="btn-remove-color" onclick="paraRemoveColor(this)">색상 제거</button>
       </div>
     </div>`;
   return d;
@@ -913,6 +933,37 @@ function paraFmt(btn,cmd,val){
   ed.focus();
   if(val) document.execCommand(cmd,false,val);
   else document.execCommand(cmd,false,null);
+}
+
+function toggleColorPalette(btn){
+  const palette=btn.closest(".para-content").querySelector(".color-palette");
+  const isOpen=palette.style.display==="flex";
+  // 다른 팔레트 모두 닫기
+  document.querySelectorAll(".color-palette").forEach(p=>p.style.display="none");
+  palette.style.display=isOpen?"none":"flex";
+}
+
+function paraColor(btn,color){
+  const ed=btn.closest(".para-content").querySelector(".para-editor");
+  ed.focus();
+  document.execCommand("foreColor",false,color);
+}
+
+function paraRemoveColor(btn){
+  const ed=btn.closest(".para-content").querySelector(".para-editor");
+  ed.focus();
+  // 선택 영역에서 색상만 제거 (style 내 color 속성 제거)
+  const sel=window.getSelection();
+  if(sel&&sel.rangeCount>0&&!sel.isCollapsed){
+    // span[style*=color] 직접 처리
+    document.execCommand("removeFormat",false,null);
+  } else {
+    // 전체 에디터 내 인라인 color 스타일 제거
+    ed.querySelectorAll("[style]").forEach(el=>{
+      el.style.color="";
+      if(!el.getAttribute("style")) el.removeAttribute("style");
+    });
+  }
 }
 
 function addPara(){ document.getElementById("paraList").appendChild(mkParaCard("")); }
