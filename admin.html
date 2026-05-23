@@ -754,8 +754,8 @@ async function commitToGH(content,label){
   });
   if(!r.ok){
     const e=await r.json();
-    // SHA 불일치 시 재시도
-    if(e.message && e.message.includes('does not match')){
+    // SHA 불일치 시 재시도 (does not match / is at ... but expected 두 형식 모두 처리)
+    if(r.status===409||r.status===422||(e.message&&(e.message.includes('does not match')||e.message.includes('is at')||e.message.includes('SHA')||e.message.includes('expected')))){
       const cur2=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/index.html?ref=${cfg.branch}`);
       indexSHA=cur2.sha;
       localStorage.setItem(LS_SHA,indexSHA);
