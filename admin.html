@@ -431,6 +431,9 @@
             </div>
             <div class="editor" data-large id="stmtEd" contenteditable="true" spellcheck="false"></div>
           </div>
+          <label class="fl" style="margin-top:1.4rem">출처 / 서명</label>
+          <input type="text" id="stmtCite" style="width:100%;padding:.75rem;border:1px solid var(--rule);background:#fff;font-family:var(--serif-ko);font-size:.9rem;outline:none;margin-top:.4rem" placeholder="— 최경선 작가 노트">
+          <p style="font-family:var(--garamond);font-size:.78rem;color:var(--light);margin-top:.4rem">인용문 아래에 표시되는 출처 텍스트 (예: — 최경선 작가 노트)</p>
           <div class="save-bar">
             <button class="btn-save" onclick="saveSection('stmt')">저장 &amp; 배포</button>
             <span class="save-hint" id="stmtHint"></span>
@@ -809,6 +812,9 @@ function populateForms(){
   // Statement
   const sq=htmlText.match(/<blockquote>([\s\S]*?)<\/blockquote>/);
   if(sq) document.getElementById("stmtEd").innerHTML=sq[1].trim();
+  const sc=htmlText.match(/<cite>([\s\S]*?)<\/cite>/);
+  const stmtCiteEl=document.getElementById('stmtCite');
+  if(sc && stmtCiteEl) stmtCiteEl.value=sc[1].trim();
 
   // Exhibitions
   renderExhList(parseExh());
@@ -1123,6 +1129,10 @@ async function saveSection(sec){
       /(<blockquote>)([\s\S]*?)(<\/blockquote>)/,
       (_,o,__,c)=>o+"\n    "+v+"\n  "+c
     );
+    const citeVal=(document.getElementById('stmtCite')||{}).value||'';
+    if(citeVal.trim()){
+      updated=updated.replace(/(<cite>)([\s\S]*?)(<\/cite>)/,(_,o,__,c)=>o+citeVal.trim()+c);
+    }
   }
   if(sec==="exh"){
     const list=collectExh();
