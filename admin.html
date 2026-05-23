@@ -1438,18 +1438,37 @@ async function uploadImg(fn,b64,label){
     try{
       // 파일명 안전 처리 (한글/공백 등 제거)
       const safeFn=fn.replace(/[^a-zA-Z0-9._\-]/g,'_');
+      const imgPath=`repos/${cfg.owner}/${cfg.repo}/contents/images/${safeFn}`;
+
+      // 현재 SHA 가져오기 (파일이 이미 있으면 필요)
       let sha='';
-      try{ const ex=await ghGet(`repos/${cfg.owner}/${cfg.repo}/contents/images/${safeFn}?ref=${cfg.branch}`); sha=ex.sha; }catch(_){}
-      const body={message:`이미지: ${label} — ${safeFn}`,content:b64,branch:cfg.branch};
-      if(sha) body.sha=sha;
-      const r=await fetch(`${GH_API}/repos/${cfg.owner}/${cfg.repo}/contents/images/${safeFn}`,{
-        method:'PUT', headers:{...ghHeaders(),'Content-Type':'application/json'}, body:JSON.stringify(body)
-      });
+      try{ const ex=await ghGet(`${imgPath}?ref=${cfg.branch}`); sha=ex.sha; }catch(_){}
+
+      const doUpload=async(useSha)=>{
+        const body={message:`이미지: ${label} — ${safeFn}`,content:b64,branch:cfg.branch};
+        if(useSha) body.sha=useSha;
+        return fetch(`${GH_API}/${imgPath}`,{
+          method:'PUT', headers:{...ghHeaders(),'Content-Type':'application/json'}, body:JSON.stringify(body)
+        });
+      };
+
+      let r=await doUpload(sha);
+
+      // SHA 불일치(409/422) 시 최신 SHA로 1회 재시도
       if(!r.ok){
-        let msg='HTTP '+r.status;
-        try{ const e=await r.json(); msg=e.message||msg; }catch(_){}
-        throw new Error(msg);
+        const errData=await r.json().catch(()=>({}));
+        const msg=errData.message||'';
+        if(r.status===409||r.status===422||msg.includes('does not match')||msg.includes('SHA')){
+          sha='';
+          try{ const ex2=await ghGet(`${imgPath}?ref=${cfg.branch}`); sha=ex2.sha; }catch(_){}
+          r=await doUpload(sha);
+        }
+        if(!r.ok){
+          const errData2=await r.json().catch(()=>({}));
+          throw new Error(errData2.message||'HTTP '+r.status);
+        }
       }
+
       toast('✦ 이미지 업로드 완료: '+safeFn);
       return 'images/'+safeFn;
     }catch(err){ toast('❌ 업로드 실패: '+err.message); return null; }
